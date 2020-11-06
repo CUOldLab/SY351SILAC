@@ -1,0 +1,396 @@
+TRACE [2020-03-25 18:27:35] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 18:27:35] Processing data
+TRACE [2020-03-25 18:27:35] Reading yaml configuration
+TRACE [2020-03-25 18:27:35] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:27:35] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:27:35] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:27:35] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:27:35] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:27:35] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:27:50] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:27:54] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:28:33] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:28:34] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:28:36] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:28:36] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 18:28:52] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:28:53] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:28:57] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:29:09] NEWS.md file not found, creating!
+TRACE [2020-03-25 18:29:09] NEWS.md file found, updating!
+TRACE [2020-03-25 18:29:09] Saving to data
+TRACE [2020-03-25 18:29:24] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 18:29:26] Done
+TRACE [2020-03-25 18:29:26] DataPackageR succeeded
+TRACE [2020-03-25 18:29:26] Building documentation
+TRACE [2020-03-25 18:29:30] Building package
+TRACE [2020-03-25 18:35:17] Rebuilding data package documentation.
+TRACE [2020-03-25 18:37:15] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 18:37:15] Processing data
+TRACE [2020-03-25 18:37:15] Reading yaml configuration
+TRACE [2020-03-25 18:37:15] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:37:15] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:37:15] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:37:15] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:37:15] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:37:15] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:37:25] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:37:30] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:38:05] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:38:06] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:42:13] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 18:42:13] Processing data
+TRACE [2020-03-25 18:42:13] Reading yaml configuration
+TRACE [2020-03-25 18:42:13] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:42:13] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:42:13] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:42:13] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:42:13] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:42:13] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:42:22] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:42:27] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:43:04] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:43:05] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:45:24] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 18:45:24] Processing data
+TRACE [2020-03-25 18:45:24] Reading yaml configuration
+TRACE [2020-03-25 18:45:24] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:45:24] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:45:24] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:45:24] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:45:24] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:45:24] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:45:34] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:45:39] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:46:14] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:46:14] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:46:16] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:46:16] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 18:46:24] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:46:24] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:46:28] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:46:40] NEWS.md file found, updating!
+WARN [2020-03-25 18:46:40] proteinvolcano has changed.
+WARN [2020-03-25 18:46:40] proteinvolcano has changed.
+WARN [2020-03-25 18:46:40] proteinvolcano has changed.
+TRACE [2020-03-25 18:46:40] NEWS.md file found, updating!
+TRACE [2020-03-25 18:46:40] NEWS.md file found, updating!
+TRACE [2020-03-25 18:46:40] Data has been updated and DataVersion string incremented automatically to 0.1.1
+TRACE [2020-03-25 18:46:40] Saving to data
+TRACE [2020-03-25 18:46:53] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 18:46:55] Done
+TRACE [2020-03-25 18:46:55] DataPackageR succeeded
+TRACE [2020-03-25 18:46:55] Building documentation
+TRACE [2020-03-25 18:47:00] Building package
+TRACE [2020-03-25 18:50:27] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 18:50:27] Processing data
+TRACE [2020-03-25 18:50:27] Reading yaml configuration
+TRACE [2020-03-25 18:50:27] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:50:27] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:50:27] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:50:27] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:50:27] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:50:27] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:50:37] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:50:41] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:51:17] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:51:18] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:51:20] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:51:20] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 18:51:29] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 18:51:29] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 18:51:33] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 18:51:46] NEWS.md file found, updating!
+WARN [2020-03-25 18:51:46] proteinvolcano has changed.
+WARN [2020-03-25 18:51:46] proteinvolcano has changed.
+WARN [2020-03-25 18:51:46] proteinvolcano has changed.
+TRACE [2020-03-25 18:51:46] NEWS.md file found, updating!
+TRACE [2020-03-25 18:51:46] NEWS.md file found, updating!
+TRACE [2020-03-25 18:51:46] Data has been updated and DataVersion string incremented automatically to 0.1.2
+TRACE [2020-03-25 18:51:46] Saving to data
+TRACE [2020-03-25 18:52:00] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 18:52:02] Done
+TRACE [2020-03-25 18:52:02] DataPackageR succeeded
+TRACE [2020-03-25 18:52:02] Building documentation
+TRACE [2020-03-25 18:52:07] Building package
+TRACE [2020-03-25 19:07:54] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 19:07:54] Processing data
+TRACE [2020-03-25 19:07:54] Reading yaml configuration
+TRACE [2020-03-25 19:07:54] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:07:54] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:07:54] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:07:54] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:07:54] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:07:54] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:08:08] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:08:12] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:08:48] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:08:49] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:08:51] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:08:51] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 19:09:07] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:09:07] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:09:11] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:09:23] NEWS.md file found, updating!
+WARN [2020-03-25 19:09:23] proteinvolcano has changed.
+WARN [2020-03-25 19:09:23] proteinvolcano has changed.
+WARN [2020-03-25 19:09:23] proteinvolcano has changed.
+TRACE [2020-03-25 19:09:23] NEWS.md file found, updating!
+TRACE [2020-03-25 19:09:41] NEWS.md file found, updating!
+TRACE [2020-03-25 19:09:41] Data has been updated and DataVersion string incremented automatically to 0.1.3
+TRACE [2020-03-25 19:09:41] Saving to data
+TRACE [2020-03-25 19:09:56] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 19:09:57] Done
+TRACE [2020-03-25 19:09:57] DataPackageR succeeded
+TRACE [2020-03-25 19:09:57] Building documentation
+TRACE [2020-03-25 19:10:02] Building package
+TRACE [2020-03-25 19:21:47] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 19:21:47] Processing data
+TRACE [2020-03-25 19:21:47] Reading yaml configuration
+TRACE [2020-03-25 19:21:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:21:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:21:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:21:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:21:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:21:47] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:21:59] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:22:03] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:22:38] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:22:39] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:22:41] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:22:41] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 19:22:49] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:22:50] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:22:54] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:23:05] NEWS.md file found, updating!
+WARN [2020-03-25 19:23:05] proteinvolcano has changed.
+WARN [2020-03-25 19:23:05] proteinvolcano has changed.
+WARN [2020-03-25 19:23:05] proteinvolcano has changed.
+TRACE [2020-03-25 19:23:05] NEWS.md file found, updating!
+TRACE [2020-03-25 19:24:31] NEWS.md file found, updating!
+TRACE [2020-03-25 19:24:31] Data has been updated and DataVersion string incremented automatically to 0.1.4
+TRACE [2020-03-25 19:24:31] Saving to data
+TRACE [2020-03-25 19:24:45] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 19:24:47] Done
+TRACE [2020-03-25 19:24:47] DataPackageR succeeded
+TRACE [2020-03-25 19:24:47] Building documentation
+TRACE [2020-03-25 19:24:52] Building package
+TRACE [2020-03-25 19:32:47] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-25 19:32:47] Processing data
+TRACE [2020-03-25 19:32:47] Reading yaml configuration
+TRACE [2020-03-25 19:32:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:32:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:32:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:32:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:32:47] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:32:47] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:32:57] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:33:01] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:33:36] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:33:36] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:33:38] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:33:38] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-25 19:33:47] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-25 19:33:47] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-25 19:33:51] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-25 19:34:02] NEWS.md file found, updating!
+WARN [2020-03-25 19:34:02] proteinvolcano has changed.
+WARN [2020-03-25 19:34:02] proteinvolcano has changed.
+WARN [2020-03-25 19:34:02] proteinvolcano has changed.
+TRACE [2020-03-25 19:34:02] NEWS.md file found, updating!
+TRACE [2020-03-25 19:36:20] NEWS.md file found, updating!
+TRACE [2020-03-25 19:36:20] Data has been updated and DataVersion string incremented automatically to 0.1.5
+TRACE [2020-03-25 19:36:20] Saving to data
+TRACE [2020-03-25 19:36:34] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-25 19:36:35] Done
+TRACE [2020-03-25 19:36:35] DataPackageR succeeded
+TRACE [2020-03-25 19:36:35] Building documentation
+TRACE [2020-03-25 19:36:41] Building package
+TRACE [2020-03-27 16:34:04] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-27 16:34:04] Processing data
+TRACE [2020-03-27 16:34:04] Reading yaml configuration
+TRACE [2020-03-27 16:34:04] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:04] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:04] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:04] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:34:04] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:04] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:34:18] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:22] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:34:59] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:34:59] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:35:02] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:35:02] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-27 16:35:19] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:35:19] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:36:39] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-27 16:36:39] Processing data
+TRACE [2020-03-27 16:36:39] Reading yaml configuration
+TRACE [2020-03-27 16:36:39] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:36:39] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:36:39] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:36:39] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:36:39] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:36:39] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:36:51] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:36:55] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:37:30] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:37:31] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:37:33] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:37:33] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-27 16:37:41] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:37:41] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:39:59] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-27 16:39:59] Processing data
+TRACE [2020-03-27 16:39:59] Reading yaml configuration
+TRACE [2020-03-27 16:39:59] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:39:59] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:39:59] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:39:59] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:39:59] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:39:59] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:40:09] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:40:13] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:40:48] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:40:49] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:40:51] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:40:51] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-27 16:40:59] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:41:00] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:41:03] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:41:15] NEWS.md file found, updating!
+WARN [2020-03-27 16:41:15] proteinvolcano has changed.
+WARN [2020-03-27 16:41:15] proteinvolcano has changed.
+WARN [2020-03-27 16:41:15] proteinvolcano has changed.
+TRACE [2020-03-27 16:41:15] NEWS.md file found, updating!
+TRACE [2020-03-27 16:43:22] NEWS.md file found, updating!
+TRACE [2020-03-27 16:43:22] Data has been updated and DataVersion string incremented automatically to 0.1.6
+TRACE [2020-03-27 16:43:22] Saving to data
+TRACE [2020-03-27 16:43:36] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-27 16:43:37] Done
+TRACE [2020-03-27 16:43:37] DataPackageR succeeded
+TRACE [2020-03-27 16:43:37] Building documentation
+TRACE [2020-03-27 16:43:42] Building package
+TRACE [2020-03-27 16:45:50] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-27 16:45:50] Processing data
+TRACE [2020-03-27 16:45:50] Reading yaml configuration
+TRACE [2020-03-27 16:45:50] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:45:50] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:45:50] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:45:50] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:45:50] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:45:50] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:46:00] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:46:05] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:46:40] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:46:40] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:46:42] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:46:42] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-27 16:46:51] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 16:46:51] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 16:46:55] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 16:47:06] NEWS.md file found, updating!
+WARN [2020-03-27 16:47:06] proteinvolcano has changed.
+WARN [2020-03-27 16:47:06] proteinvolcano has changed.
+WARN [2020-03-27 16:47:06] proteinvolcano has changed.
+TRACE [2020-03-27 16:47:06] NEWS.md file found, updating!
+TRACE [2020-03-27 16:47:23] NEWS.md file found, updating!
+TRACE [2020-03-27 16:47:23] Data has been updated and DataVersion string incremented automatically to 0.1.7
+TRACE [2020-03-27 16:47:23] Saving to data
+TRACE [2020-03-27 16:47:37] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-27 16:47:38] Done
+TRACE [2020-03-27 16:47:38] DataPackageR succeeded
+TRACE [2020-03-27 16:47:38] Building documentation
+TRACE [2020-03-27 16:47:43] Building package
+TRACE [2020-03-27 17:02:25] Logging to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/inst/extdata/Logfiles/processing.log
+TRACE [2020-03-27 17:02:25] Processing data
+TRACE [2020-03-27 17:02:25] Reading yaml configuration
+TRACE [2020-03-27 17:02:25] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:02:25] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:02:25] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:02:25] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 17:02:25] Found D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:02:25] Processing 1 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 17:02:39] 2 data set(s) created by parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:02:43] Processing 2 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 17:03:19] 2 data set(s) created by analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:03:20] Processing 3 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 17:03:22] 2 data set(s) created by make_site_table_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:03:22] Processing 4 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/prepare_analyze_momo_motif_analysis.Rmd
+
+TRACE [2020-03-27 17:03:38] 4 data set(s) created by prepare_analyze_momo_motif_analysis.Rmd
+TRACE [2020-03-27 17:03:38] Processing 5 of 5: D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/data-raw/parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+TRACE [2020-03-27 17:03:41] 2 data set(s) created by parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+TRACE [2020-03-27 17:03:53] NEWS.md file found, updating!
+WARN [2020-03-27 17:03:53] proteinvolcano has changed.
+WARN [2020-03-27 17:03:53] proteinvolcano has changed.
+WARN [2020-03-27 17:03:53] proteinvolcano has changed.
+TRACE [2020-03-27 17:03:53] NEWS.md file found, updating!
+TRACE [2020-03-27 17:05:26] NEWS.md file found, updating!
+TRACE [2020-03-27 17:05:26] Data has been updated and DataVersion string incremented automatically to 0.1.8
+TRACE [2020-03-27 17:05:26] Saving to data
+TRACE [2020-03-27 17:05:40] Copied documentation to D:/Will/PROJECTS/INDUSTRY_COLLABORATIONS/SYROS_COLLABORATION/SY351SILAC/R/SY351SILAC.R
+TRACE [2020-03-27 17:05:41] Done
+TRACE [2020-03-27 17:05:41] DataPackageR succeeded
+TRACE [2020-03-27 17:05:41] Building documentation
+TRACE [2020-03-27 17:05:45] Building package

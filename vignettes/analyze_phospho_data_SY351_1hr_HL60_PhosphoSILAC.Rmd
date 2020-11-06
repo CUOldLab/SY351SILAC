@@ -1,0 +1,718 @@
+---
+title: R Analysis of Zach Poss' Syros SY-351 1h HL-60 SILAC phosphoproteome data
+author: William M. Old, Zachary Poss, Jeremy Jacobsen
+date: March 19, 2020
+output:
+  html_document:
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{R Analysis of Zach Poss' Syros SY-351 1h HL-60 SILAC phosphoproteome data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 8, collapse = F)
+```
+
+***Identification of CDK7 phosphorylation targets with SILAC phosphoproteomics and Syros covalent CDK7 inhibitor SY-351
+The data is from Orbitrap Fusion mass spec analysis of two channel (light:heavy) SILAC phosphoproteome from SY-351 treated HL-60 cells.
+
+This is the second of five R markdown (Rmd) files used to generate the vignettes in the SY351SILAC data package:
+
+1. parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. **analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd**
+1. make_site_table_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. prepare_analyze_momo_motif_analysis.Rmd
+1. parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+This vignette is part of the SY351SILAC package and documents the differential statistical analysis (empirical Bayes) of the phosphosites data frame to identify sites that change upon treatment of HL60 cells with the covalent CDK7 inhibitor. This generates the psitestats data frame. (the data frame is a tbl_df or tibble - see dplyr package and tidyverse in general for info)
+
+In a nutshell, the biggest improvement in statistical power comes from incorporating into
+the model two coefficients, one for the log2 ratio of SY-351/DMSO and a coefficient
+corresponding to a systematic label effect, a.k.a. isotope effect, analogous to a 
+dye swap design in 2-color microarrays and limma's nomenclature. For this to work, ensure that
+the sign of ratios for the label-swap sample has not been manually inverted, for example in Persues. 
+Otherwise the linear equations will not work. The other improvement came from filtering 
+highly extreme null effect log2 ratios. See html document for details on threshold values – I didn’t fiddle with these very much
+and just picked one and went with it. There is a trade-off here with modeling the isotope effect.
+You give up one degree of freedom to estimate this coefficient, at the expense of degrees of
+freedom that would be used to estimate your residual variance. If the isotope effect wasn’t a
+major effect, you would observe a degradation in performance.
+
+```{r loading-libs, message=FALSE}
+library(tidyverse)
+library(limma)
+library(lattice)
+library(grid)
+library(gridExtra)
+library("ggpubr")
+library( GGally)
+library(filenamer)
+options(stringsAsFactors = FALSE)
+options(warn=-1)
+# define functions
+# 
+source( DataPackageR::project_path('data-raw/fdrfunctions.R'))
+source( DataPackageR::project_path('data-raw/silac_model_matrix.R'))
+source( DataPackageR::project_path('data-raw/my.panel.cor.R'))
+source( DataPackageR::project_path('data-raw/ggvolcano.R'))
+source( DataPackageR::project_path('data-raw/get_toptable.R'))
+source( DataPackageR::project_path('data-raw/extract.first.id.R'))
+# get_toptable
+# get.toptable <- function(fitobj, coef, glist, suffix) {
+#   require(limma)
+#   require(dplyr)
+#   ttemp <- limma::topTable(fitobj,coef = coef,genelist = glist,number = Inf,p.value = 1)
+#   ttemp <- dplyr::as_tibble(ttemp) %>% dplyr::rename( ID = Unique.identifier)
+#   datinds <-  which(names(ttemp) != "ID")
+#   names(ttemp)[datinds] <- paste(names(ttemp)[datinds], suffix, sep="")
+#   return(ttemp)
+# }
+
+# When running this example as a standalone Rmd file, these lines will need to be changed to 
+# import the phosphosites and targets data frame from elsewhere. These lines are used by
+# DataPackageR to generate vigenettes from this Rmd file during data package generation 
+# for the SY351SILAC data package.
+phosphosites <- DataPackageR::datapackager_object_read("phosphosites")
+targets <- DataPackageR::datapackager_object_read("targets")
+
+
+```
+
+### Set up important parameters
+```{r paramsetup}
+
+# any psites with SILAC ratios in the null experiment (no treatment in either channel) will be removed prior to linear modeling
+abs_null_log2ratio_thresh <- 0.5 
+# Any psites are removed for which there are numvalid_trt_thresh or less valid ratios 
+# (counting only the samples containing a treatment channel)  
+numvalid_trt_thresh <- 2
+
+# False discovery rate threshold for differential expression with SY-351 treatment
+fdr.thresh <- 0.05
+
+phseqlen <- 13 # Intended length of final phosphosequence window to submit to MoMo
+
+```
+### Targets data frame
+The target matrix  maps sample names with sample SILAC ratios (column names in PhosphoSTY.txt file)
+and which samples were labeled with what SILAC label.
+Make sure the the target data frame has two columns: Light and Heavy
+which indicates the sample's SILAC label.
+targets. e.g. for a label-swap design.
+    
+ 
+```{r targets}
+
+targets
+```
+
+* **samples**: text field with the sample name used in downstream analysis. Samples here refer to the mass spec runs for each L:H plex. Data column names will be changed to this field's value.  
+* **samplenames**: text field with name of the column in the PhosphoSTY.txt file that has been processed by Perseus.  
+* **Light**: text field indicating which experimental treatment group was SILAC labeled with (unlabeled) amino acids.  
+* **Heavy**: text field indicating which experimental treatment group was SILAC labeled with heavy amino acids.
+
+
+
+### Plot densities of phosphosite SILAC ratios in each L:H SILAC plex . 
+These distributions should be centered on a log2 ratio of zero
+
+```{r plotdens}
+
+limma::plotDensities(phosphosites[,targets$samples])
+
+```
+
+### Tabulate the number of valid values for each phosphosite
+```{r}
+table(phosphosites$numvalid)
+
+# 2     3     4 
+# 3295  4632 16614 
+
+table(phosphosites$numvalid_trt)
+
+```
+
+### Normalize SILAC phosphosite ratios using limma's cyclic loess algorithm
+```{r normalize_ratios}
+
+# Copy ratio columns to a new set of columns representing unnormalized ratios (*_nonorm)
+nonorm <- function(x) {x}
+
+phosphosites <- phosphosites %>% mutate_at(vars(targets$samples), .funs = list(nonorm = ~nonorm(.) )) 
+
+phosphosites[,targets$samples]  <- limma::normalizeBetweenArrays(phosphosites[,targets$samples],method = "cyclicloess")
+
+```
+
+### Set up model matrices to compare different models
+The first design matrix "design" has just one coefficient (1st and only column) that captures
+the log2(SY351/DMSO) effect. The next design matrix "design.isotopeffect" The first coeficient (first column) 
+is the systematic "isotope effect", which in this context is the systematic difference in the Heavy vs. Light effect
+superimposed on all the other treatments, modeled as an intercept coefficient.
+The second coefficient (column 2) is the log2(SY351/DMSO) effect. This alternative design has improved
+statistical power due to explicit modeling of the isotope labeling effect. We hypothesize that this effect,
+which we have observed in independent experiments with multiple cell lines, is due to protein expression changes
+in the independent cell populations that diverge during the amino acid labeling. 
+
+
+```{r setup_model_matrices}
+
+design <- silac_model_matrix(targets, ref = "DMSO")
+design
+
+design.isotopeffect <- cbind(rep(1,length(targets$samples)), design)
+colnames(design.isotopeffect) <- c("isotope","SY351")
+design.isotopeffect
+
+# In case NA's are not filtered out in source file from Perseus, this condition is used to only 
+# use rows that have at least 2 valid log2 ratios
+selectedrows <- phosphosites$numvalid_trt > numvalid_trt_thresh
+
+# Assign a variable to index those rows with at least 2 valid values and null log2ratios within a range
+# defined by the  abs_null_log2ratio_thresh parameter
+
+selectedrows.nullfilt <- selectedrows &  
+  !is.na(phosphosites$null) & 
+  abs(phosphosites$null) < abs_null_log2ratio_thresh
+
+sum(selectedrows.nullfilt)
+#[1] 19012
+
+```
+
+### Perform linear modeling with limma's lmFit.
+Here we set up all the fitted model objects and eBayes fitting, with the goal to
+compare the different models as specified in the two different design matrices, 
+design and design.isotopeffect. Each of these is tested in combination with a
+row filter that tests the exclusion of phosphosites with large isotope effects
+as seen by extreme SILAC ratios in the null condition, in which both channels
+are vehicle treated.
+
+```{r lmfitmodeling}
+
+syrlm <- lmFit(phosphosites[selectedrows,targets$samples],design)
+syrlm$Amean <- log10(phosphosites$Intensity[selectedrows])
+
+syrlm.nullfilt <- lmFit(phosphosites[selectedrows.nullfilt,targets$samples],design)
+syrlm.nullfilt$Amean <- log10(phosphosites$Intensity[selectedrows.nullfilt])
+
+syrlm.isotopeffect <- lmFit(phosphosites[selectedrows,targets$samples],design.isotopeffect)
+syrlm.isotopeffect$Amean <- log10(phosphosites$Intensity[selectedrows])
+
+syrlm.nullfiltisotope <- lmFit(phosphosites[selectedrows.nullfilt,targets$samples],design.isotopeffect)
+syrlm.nullfiltisotope$Amean <- log10(phosphosites$Intensity[selectedrows.nullfilt])
+
+fit.simp <- eBayes(syrlm, trend = T)
+fit.notrend <- eBayes(syrlm, trend = F)
+fit2.isotopeffect <- eBayes(syrlm.isotopeffect, trend = T)
+fit2.nullfilt <- eBayes(syrlm.nullfilt, trend = T)
+fit2.nullfiltisotope <- eBayes(syrlm.nullfiltisotope, trend = T)
+```
+
+### Compare models with Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC) 
+The output here indicates which is the best fitting model (simple vs. two-coefficient model with isotope effect. 
+This uses limma's selectModel() function, which chooses, for each probe, the best fitting model out 
+of a set of alternative models represented by a list of design matrices. Selection is by 
+Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC). Best performance
+seen with the model that incorporates the isotope effect.
+
+```{r compare_two_models, fig.width = 4, fig.height = 4, fig.show = "hold", out.width = "50%"}
+designlist <- list(simple = design, isoeffect = design.isotopeffect)
+datadf <- phosphosites[selectedrows,targets$samples]
+datadfvalids <- apply(datadf, 1, function(x) {sum(!is.na(x))} )
+table(datadfvalids)
+out.aic <- selectModel(datadf[datadfvalids == 4,], designlist, criterion = 'aic')
+out.bic <- selectModel(datadf[datadfvalids == 4,], designlist, criterion = 'bic')
+
+table(out.aic$pref)
+table(out.bic$pref)
+
+barplot(table(out.aic$pref), main = 'Akaike Information Criterion (AIC)', 
+        ylab = '# sites with best score')
+barplot(table(out.bic$pref), main = 'Bayesian Information Criterion (BIC)', 
+        ylab = '# sites with best score')
+
+```
+
+### Generate the tables of phosphosites with differential expression statistics for each model.
+Return tables of phosphosites with moderated t-test statistics from empirical Bayes analysis. 
+The first coefficient in the isotope effect models is an intercept, which represents the isotope effect. The second coefficient captures the log2(SY351/DMSO) effect. If you want to see the isotope label effect, you could call the function with coef = 1 in those cases.
+
+```{r ranktopsites}
+meta.names <- c("Unique.identifier",targets$samples,'uniprot.acc.leading', 
+                'Gene.name',"psite", "gene.psite", "Sequence.window", "proteinclass",
+                'Position',"Amino.acid", "PhosphoSitePlus.kinase","Protein.name", 'Gene.names')
+
+#meta.names[!meta.names %in% names(phosphosites)]
+
+sy351.nullfiltisotope <- get_toptable(fit2.nullfiltisotope, coef = 2, 
+                                      glist = phosphosites[selectedrows.nullfilt,meta.names[1]], suffix = ".nullfiltisotope")
+
+sy351.isotopeffect <- get_toptable(fit2.isotopeffect, coef = 2, 
+                                   glist = phosphosites[selectedrows,meta.names[1]], suffix = ".isotopeffect")
+
+sy351.isotopeffect.coef1 <- get_toptable(fit2.isotopeffect, coef = 1, 
+                                         glist = phosphosites[selectedrows,meta.names[1]], suffix = ".Coef1isotopeffect")
+
+sy351.simp <- get_toptable(fit.simp, coef = 1, 
+                           glist = phosphosites[selectedrows,meta.names[1]], suffix = ".simp")
+
+sy351.notrend <- get_toptable(fit.notrend, coef = 1, 
+                              glist = phosphosites[selectedrows,meta.names[1]], suffix = ".notrend")
+
+sy351.nullfilt <- get_toptable(fit2.nullfilt, coef = 1, 
+                               glist = phosphosites[selectedrows.nullfilt,meta.names[1]], suffix = ".nullfilt")
+
+```
+
+```{r tabulatehits, echo = T}
+
+sum(sy351.simp$adj.P.Val.simp < fdr.thresh,na.rm = T)
+sum(sy351.notrend$adj.P.Val.notrend < fdr.thresh,na.rm = T)
+
+sum(sy351.isotopeffect$adj.P.Val.isotopeffect < fdr.thresh,na.rm = T)
+sum(sy351.isotopeffect.coef1$adj.P.Val.Coef1isotopeffect < fdr.thresh,na.rm = T)
+
+sum(sy351.isotopeffect.coef1$adj.P.Val.Coef1isotopeffect < fdr.thresh & 
+      abs(sy351.isotopeffect.coef1$logFC.Coef1isotopeffect) > abs_null_log2ratio_thresh,na.rm = T)
+
+sum(sy351.nullfilt$adj.P.Val.nullfilt < fdr.thresh,na.rm = T)
+sum(sy351.nullfiltisotope$adj.P.Val.nullfiltisotope < fdr.thresh,na.rm = T)
+
+sum(sy351.nullfiltisotope$adj.P.Val.nullfiltisotope < fdr.thresh &
+        abs(sy351.nullfiltisotope$logFC.nullfiltisotope) > abs_null_log2ratio_thresh,
+    na.rm  =  T)
+# [1] 308
+# [1] 246
+# [1] 1210
+# [1] 2440
+# [1] 668
+# [1] 584
+# [1] 1435
+# [1] 608
+```
+
+### Join all tables together
+Join all these together to make the venn diagram analysis easier and for a final output table.
+Start with the best model as the first table to join
+
+```{r jointables}
+
+
+ 
+psitestats <- sy351.nullfiltisotope %>%
+    dplyr::full_join(sy351.isotopeffect, by = 'ID') %>%
+    dplyr::full_join(sy351.nullfilt, by = 'ID') %>%
+    dplyr::full_join(sy351.simp, by = 'ID') %>%
+    dplyr::full_join(sy351.notrend, by = 'ID') %>% 
+  dplyr::as_tibble()
+
+
+logfcnms <- grep("logFC",names(psitestats), value = T)
+pvalnms <-  grep("^P.Val",names(psitestats), value = T)
+adjpvalnms <-  grep("^adj.P.Val",names(psitestats), value = T)
+
+psitestats <- psitestats[, names(psitestats) %in% c("ID",logfcnms,adjpvalnms, pvalnms)]
+psitestats <- psitestats %>% left_join(phosphosites[selectedrows, meta.names], by = c("ID" = "Unique.identifier"))
+
+syrdatnms <- c("ID", "logFC.nullfiltisotope", "P.Value.nullfiltisotope", "adj.P.Val.nullfiltisotope", 
+               "null", "rep1", "rep2", "rep3LF", "Gene.name", "Gene.names",  "proteinclass",
+               "psite", "gene.psite", "Sequence.window", "Position", "Amino.acid", "PhosphoSitePlus.kinase", 
+               "uniprot.acc.leading",  "Protein.name",
+               "logFC.isotopeffect", "P.Value.isotopeffect", "adj.P.Val.isotopeffect", 
+               "logFC.nullfilt", "P.Value.nullfilt", "adj.P.Val.nullfilt", "logFC.simp", 
+               "P.Value.simp", "adj.P.Val.simp", "logFC.notrend", "P.Value.notrend", 
+               "adj.P.Val.notrend")
+
+syrdatnms[!syrdatnms %in% names(psitestats)]
+names(psitestats)[names(psitestats) %in% syrdatnms]
+
+syrdatnms <- syrdatnms[syrdatnms %in% names(psitestats)]
+
+psitestats <- psitestats %>% dplyr::select(all_of(syrdatnms))
+
+psitestats[,pvalnms][is.na(psitestats[,pvalnms])] <- 1
+psitestats[,adjpvalnms][is.na(psitestats[,adjpvalnms])] <- 1
+
+# extract.first.id is defined in the fdrfunctions.R file
+
+#psitestats <- psitestats %>% tibble::add_column(Gene.name = extract.first.id(psitestats$Gene.names))
+
+#psitestats$gene.psite <- paste(psitestats$Gene.name, psitestats$psite, sep=".")
+
+psitestats
+
+```
+
+
+```{r}
+kinmults <- strsplit( psitestats$PhosphoSitePlus.kinase, ";")
+#table(sapply(kinmults, length))
+
+abrevkinases <- function(kins) {
+    
+    if(length(kins) == 0) {
+      kinr <- ""  
+    } else if (length(kins) == 1) {
+        kinr <-  paste("<-", kins[1],sep = '', collapse = "") 
+    } else if (length(kins) == 2) {
+        kinr <- paste("<-", kins[1], ";", kins[2],sep = '', collapse = '')  
+    } else if (length(kins) > 2) {
+        kinr <- paste(c("<-", kins[1], "...", kins[length(kins)]), sep = '',collapse = '')
+    }
+}    
+
+kinabbrev <- lapply(kinmults, abrevkinases)
+
+psitestats <- psitestats %>% tibble::add_column( kinabbrev = unlist(kinabbrev))
+
+psitestats <- psitestats %>% tibble::add_column( gene.psite.kinase =  
+                                                   paste(psitestats$gene.psite, psitestats$kinabbrev, sep=""))
+
+psitestats$gene.psite.kinase[psitestats$kinabbrev == ''] <-  psitestats$gene.psite[psitestats$kinabbrev == ''] 
+
+psitestats <- psitestats %>% left_join(phosphosites %>% 
+                               select(Unique.identifier, Multiplicity:Intensity.H), 
+                             by = c("ID" = "Unique.identifier"))
+
+
+count.unique <- function(x) {
+  length(unique(x))
+}
+
+columnuniques <- lapply(psitestats, count.unique)
+
+#lapply(psitestats[columnuniques == 1], function(x) unique(x))
+
+psitestats <- psitestats[columnuniques > 1]
+
+psitestats
+```
+
+
+### Venn diagram analysis to compare different models
+Shown below is a venn diagram of significant sites that overlap in three different models.
+The best is the “dye effect+null filtered” model, at 1435 sites with qval < 0.05.
+The dye effect alone does not use any filtering of extreme null ratios, and the null filtered method
+filters extreme null ratios but does not model a dye effect. The simple method that does not do either
+and only estimates the log2 (SY-351/DMSO) effect is not included here, as it results in very few (<300)
+sites that pass threshold, due to the un-modeled systematic error from the SILAC label effect.
+The trend = T parameter to eBayes() uses mean intensity of the SILAC triplet to condition the eBayes
+significance estimates and trend=T improves for all models, so was only tested with the simple model.
+See html file for more details.
+
+```{r vennanalysis, fig.width = 6, fig.asp = 1,out.width = "70%", fig.align = "center"}
+
+vsyr <- as.matrix(psitestats[,grep("adj.P.Val",names(psitestats), value = T)])
+
+vsyrsig <- (vsyr < fdr.thresh ) + 0
+
+vsyrsig[is.na(vsyrsig)] <- 0
+
+apply(vsyrsig, 2, table)
+
+selind <- vsyrsig[,2] == 0 & vsyrsig[,1] == 1 & vsyrsig[,3] == 0
+
+selind2 <- vsyrsig[,2] == 1 & vsyrsig[,1] == 0 
+
+cols2venn <- c(1:3)
+
+#+ fig.width=8, fig.height=8
+vennDiagram(vennCounts(vsyrsig[,cols2venn]), main = paste("qval < ", fdr.thresh, sep = ""),
+            names = c("Isotope effect &\nnull filtered","Isotope\neffect only",  "Null filtered only"))
+
+
+apply(vsyrsig, 2, table)
+
+vennCounts(vsyrsig[,cols2venn])
+ 
+vennpdffilename <-  as.character(filenamer::filename('Syros_venn_modelcompare_overlap_minvalid3', ext = 'pdf', subdir = F))
+filenamer::make_path(vennpdffilename)
+
+# Uncomment to make a pdf plot
+pdf(file = vennpdffilename, width = 8, height = 8)
+limma::vennDiagram(vennCounts(vsyrsig[,cols2venn]), main = paste("qval < ", fdr.thresh, sep = ""),
+             names = c("Label effect &\nnull filtered","Label effect only",  "null filtered only"))
+ 
+dev.off()
+
+```
+
+### Volcano plot of differentially expressed phosphorylation sites in response to SY-351 treatment in HL-60 cells
+```{r volcanoplot, fig.width = 6, fig.asp = 0.8,out.width = "100%", fig.align = "center", message = F, warning = F}
+psitestats <- psitestats %>% dplyr::mutate(logp = -log10(P.Value.nullfiltisotope))
+
+mygglist <- ggvolcano(psitestats, xvar =  logFC.nullfiltisotope, 
+                      yvar = logp, 
+                      fdr.range.cut = c(0,0.01,1),
+                      adjpvalvar = adj.P.Val.nullfiltisotope,
+                      labelvar = gene.psite, 
+                      label.fdr.thresh = 0.0025,
+                      high.sig.threshold = 0.001, 
+                      xlimits = c(-3.5,3.5), 
+                      ylimits = c(0,8), 
+                      annotgenes = T,
+                      xtitle = 'log2(SY351/DMSO)',
+                      ytitle = 'log10(p-value)')
+
+ 
+mygglist$ggplot_volcano
+
+mygglist$plotly_volcano
+
+ggsave(mygglist$ggplot_volcano, device = "pdf", filename = 'sy351_SILAC_phosphosites_hl60_volcanoplot.pdf')
+
+ 
+```
+
+### Scatterplot matrix showing the isotope-label swap design and isotope bias
+The isotope-label flip is seen as anti-correlation with the non-swapped conditions,
+and the isotope bias effect is seen as a non-zero correlation in the null comparisions,
+and the superposition of these correlated sites in the flipped sample (rep3LF)
+
+```{r labelflip_scatterplotmatrix, message = FALSE, warning = FALSE,fig.width = 6, fig.asp = 1,out.width = "70%", fig.align = "center"}
+
+
+
+gg.fdr.range.cut <-  c(0,0.01,1)
+adjpval.ranges <- cut(psitestats$adj.P.Val.nullfiltisotope, gg.fdr.range.cut, include.lowest = T)  
+
+
+psitestats <- psitestats %>% 
+  mutate(gg.fdr.range  = factor(adjpval.ranges,
+                                    levels = levels(adjpval.ranges),ordered = T,
+                                    labels =  c( paste(gg.fdr.range.cut[1],'< q <=',gg.fdr.range.cut[2],sep = ''),
+                                                 paste(gg.fdr.range.cut[2],'< q <=',gg.fdr.range.cut[3],sep = ''))))
+  
+
+
+psitestats <- psitestats %>% add_column(alph = 0)
+
+psitestats$alph[psitestats$gg.fdr.range == '0.01< q <=1'] <- 0.2
+psitestats$alph[psitestats$gg.fdr.range == '0< q <=0.01'] <- 1
+
+my_dens <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_density(..., alpha = 0.7, color = NA) 
+}
+
+psitestats$gg.fdr.range <- factor(psitestats$gg.fdr.range ,
+       levels = rev(levels(psitestats$gg.fdr.range )),ordered = T)
+
+pm <- GGally::ggpairs(psitestats, 
+                      mapping = aes(color = gg.fdr.range, fill = gg.fdr.range, alpha = alph), 
+              columns = c("null", "rep1", "rep2", "rep3LF"),
+              title = 'SY351-treated HL60 Phosphorylation Site Log2 Ratios',
+              xlab = 'log2(SY351/DMSO)', ylab = 'log2(SY351/DMSO)',
+              upper = list(continuous = function(data, mapping, ...) {
+                ggally_cor(data = data, mapping = mapping, size = 2) + 
+                  scale_colour_manual(values = c("black","red"))
+              }),
+              diag = list(continuous = function(data, mapping, ...) {
+                ggally_densityDiag(data = data, mapping = mapping, alpha = 0.5) +
+                  scale_fill_manual(values = c("black","red")) +
+                  scale_color_manual(values = c("black","black")) +
+                  coord_cartesian(xlim = c(-3,3))
+              }),
+              lower = list(continuous = function(data, mapping, ...) {
+                ggally_smooth(data = data, mapping = mapping) + 
+                  scale_colour_manual(values = c("black", "red")) +
+                  coord_cartesian(xlim = c(-3,3),
+                                  ylim = c(-3,3)) 
+                }))
+
+
+pm <- pm + theme_bw()
+pm
+ggsave(pm <- pm + theme_bw(), device = "pdf", filename = 'sy351_SILAC_phosphosites_hl60_scatterplotmatrix.pdf')
+
+```
+
+### Reformat the Sequence.window column to select first (if multiples concatenated with ";") and lower case the phosphorylated residue
+
+```{r}
+
+firstseqs <-  extract.first.id(psitestats$Sequence.window)
+
+aas <- sort(unique(unlist(strsplit(firstseqs, ""))))
+aas
+
+# if there are U's or _, uncomment below lines if sending to momo
+# 
+if (any(aas == "U")) {
+  firstseqs <- gsub("U", "X", firstseqs)
+}
+if (any(aas == "_")) {
+  firstseqs <- gsub("_", "X", firstseqs)
+}
+
+#
+
+phrespos <- (unique(nchar(firstseqs)) + 1)/2
+
+
+firstseqs <- substr(firstseqs, start = phrespos - ((phseqlen - 1)/2), 
+                    stop = phrespos + ((phseqlen - 1)/2))
+
+newphrespos <- (unique(nchar(firstseqs)) + 1)/2
+
+pseqs.psitelower <- paste(substr(firstseqs, start = 1, stop = newphrespos - 1),
+                          tolower(substr(firstseqs, start = newphrespos, stop = newphrespos)),
+                          substr(firstseqs, start = newphrespos + 1, stop = phseqlen),sep = "")
+
+psitestats$Seqwin <-  pseqs.psitelower
+
+psitestats %>% dplyr::filter(Gene.name == "CDK12") %>% 
+  select(Gene.names, psite, logFC.nullfiltisotope, adj.P.Val.nullfiltisotope, Seqwin,
+         PhosphoSitePlus.kinase, Pfam.domains, 
+         Regulatory.site.function, domain, Localization.prob, Sequence.window)
+
+
+# psitestats %>% dplyr::filter(grepl("kinase", domain, ignore.case = T)) %>% pull(domain) %>% unique() %>% sort() 
+# 
+# psitestats %>% dplyr::filter(grepl("kinase", domain, ignore.case = T)) %>% pull(Protein.names) %>% unique() %>% sort() 
+# 
+# psitestats %>% dplyr::filter(grepl("kinase", Protein.names, ignore.case = T)) %>% pull(domain) %>% unique() %>% sort() 
+# 
+# psitestats %>% dplyr::filter(Protein.names == "TGF-beta receptor type-2") %>% print(width = Inf)
+
+```
+
+### Identify and remove duplicates on the Protein, gene.name, psite and sequence window level
+```{r remove_dups}
+
+# Take the most significant ratio for cases where groups of multi-phosphorylated peptides
+# for the same site result in multiple quantified site ratios.
+
+# First check to find the sites with multiples. 
+
+psitestats <- psitestats %>%  add_count(uniprot.acc.leading, Gene.name, psite, Seqwin,  name = "ndupsites") %>% 
+  arrange(desc(ndupsites), uniprot.acc.leading, Gene.name, psite)
+
+psitestats %>% dplyr::filter(ndupsites > 1) %>%
+  print(n = 10)
+
+# first check and make sure that there are no NA's in the p-value column that
+# will be used to select the row in each duplicate group (Protein, Gene.name, psite, Seqwin)
+
+sum(is.na(psitestats$P.Value.nullfiltisotope))
+
+# > sum(is.na(psitestats$P.Value.nullfiltdye))
+# [1] 0
+
+psitestats %>% group_by(uniprot.acc.leading, Gene.name, psite, Seqwin) %>% mutate(ndupsiterank = dense_rank(adj.P.Val.nullfiltisotope)) %>%
+  pull(ndupsiterank) %>% table()
+
+```
+
+### select most significant row from multiplicitous sites 
+(due to same peptide observed with more than one phosphoforms) quantified and tested
+
+```{r}
+
+psitestats <- psitestats %>% group_by(uniprot.acc.leading, Gene.name, psite, Seqwin) %>% 
+  mutate(ndupsiterank = row_number(adj.P.Val.nullfiltisotope)) %>% 
+  dplyr::filter(ndupsiterank == 1) %>% ungroup()
+# 15,555 rows
+###
+
+# Should be no values in n column > 1
+psitestats %>% count(uniprot.acc.leading, Gene.name, psite) %>% ungroup() %>% arrange(desc(n)) %>% print(n = 10)
+
+psitestats %>% count(Gene.name, psite) %>% arrange(desc(n)) %>% print(n = 50)
+
+psitestats %>% count(Gene.name, psite, Multiplicity ) %>% arrange(desc(n)) %>% print(n = 10)
+
+```
+
+### Write out data to files in a subdirectory named for current date
+Change chunk option eval = T if you'd like to write out these files
+```{r writeoutfiles, echo = T, eval = FALSE}
+
+sy351tabfile <-  as.character(filenamer::filename('SY351_HL60_SILAC_eBayes_allmodelcompare_3valid', ext = 'txt', subdir = T))
+filenamer::make_path(sy351tabfile)
+
+write.table(psitestats,
+            file = sy351tabfile,
+            quote = F,
+            sep = '\t',
+            na = "",
+            row.names = F,
+            col.names = T)
+
+write.table(names(psitestats), 
+            file = as.character(filenamer::filename('sy351_colnames_metadata_3valid', ext = 'txt', subdir = T)),
+            col.names = F, 
+            row.names = F, 
+            quote = F)
+
+
+## For Chia-Yu's kinase substrate network cytoscape analysis
+dim(psitestats[!is.na(psitestats$logFC.nullfiltisotope) & !is.na(psitestats$Gene.names) & psitestats$Gene.names != "",])
+
+
+write.table(psitestats[!is.na(psitestats$logFC.nullfiltisotope) & !is.na(psitestats$Gene.names) & psitestats$Gene.names != "",],
+            file = as.character(filenamer::filename('SY351_HL60_SILAC_eBayes_allmodelcompare_3valid_ForCYenKSR', ext = 'txt', subdir = T)),
+            quote = F,
+            sep = '\t',
+            na = "",
+            row.names = F,
+            col.names = T)
+
+
+syrgenesall05 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.05 & !is.na(psitestats$adj.P.Val.nullfiltisotope)])
+syrgenesall05 <- gsub(";.*","", syrgenesall05)
+
+write.table(syrgenesall05, file = as.character(filenamer::filename('syrgenes_upanddown_qval05', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+
+syrgenesall05.fc0p5 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.05 & !is.na(psitestats$adj.P.Val.nullfiltisotope) &
+                                                  !is.na(psitestats$logFC.nullfiltisotope) & abs(psitestats$logFC.nullfiltisotope) >= log2(1.5) ])
+syrgenesall05.fc0p5 <- gsub(";.*","", syrgenesall05.fc0p5)
+
+write.table(syrgenesall05.fc0p5, 
+            file = as.character(filenamer::filename('syrgenes_upanddown_qval05_foldchange50pct', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+
+syrgenesall01 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.01 & !is.na(psitestats$adj.P.Val.nullfiltisotope)])
+syrgenesall01 <- gsub(";.*","", syrgenesall01)
+
+write.table(syrgenesall01, file = as.character(filenamer::filename('syrgenes_upanddown_qval01', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+
+syrgenesdown05 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.05 & !is.na(psitestats$adj.P.Val.nullfiltisotope) &
+                                           !is.na(psitestats$logFC.nullfiltisotope) & psitestats$logFC.nullfiltisotope < 0])
+syrgenesdown05 <- gsub(";.*","", syrgenesdown05)
+write.table(syrgenesdown05, file = as.character(filenamer::filename('syrgenes_down_qval05', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+
+syrgenesup05 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.05 & !is.na(psitestats$adj.P.Val.nullfiltisotope) &
+                                             !is.na(psitestats$logFC.nullfiltisotope) & psitestats$logFC.nullfiltisotope > 0])
+syrgenesup05 <- gsub(";.*","", syrgenesup05)
+write.table(syrgenesup05, file = as.character(filenamer::filename('syrgenes_up_qval05', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+ 
+syrgenesdown01 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.01 & !is.na(psitestats$adj.P.Val.nullfiltisotope) &
+                                             !is.na(psitestats$logFC.nullfiltisotope) & psitestats$logFC.nullfiltisotope < 0])
+syrgenesdown01 <- gsub(";.*","", syrgenesdown01)
+write.table(syrgenesdown01, file = as.character(filenamer::filename('syrgenes_down_qval01', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+
+syrgenesup01 <- unique(psitestats$Gene.names[psitestats$adj.P.Val.nullfiltisotope < 0.01 & !is.na(psitestats$adj.P.Val.nullfiltisotope) &
+                                           !is.na(psitestats$logFC.nullfiltisotope) & psitestats$logFC.nullfiltisotope > 0])
+syrgenesup01 <- gsub(";.*","", syrgenesup01)
+write.table(syrgenesup01, file = as.character(filenamer::filename('syrgenes_up_qval01', ext = 'txt', subdir = T)), 
+            quote = F, row.names = F, col.names = F)
+
+```
+
+

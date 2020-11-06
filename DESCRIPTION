@@ -1,0 +1,46 @@
+Package: SY351SILAC
+Title: Differential Phosphoproteome and Proteome of SY-351 (CDK7 inhibitor) Treated HL-60 Cells
+Version: 1.0
+Authors@R: 
+    person(given = "William",
+           family = "Old",
+           role = c("aut", "cre"),
+           email = "william.old@colorado.edu",
+           comment = c(ORCID = "0000-0002-9499-8478"))
+Description: A data package for the phosphoproteomic and proteomic data sets published in Poss, ... Old, Taatjes and scientists at Syros, using the Syros' CDK7 inhibitor SY-351. HL-60 cells were treated with inhibitor, followed by SILAC (Light:Heavy) phosphoproteomics and proteomics analysis with TiO2 phosphopeptide enrichment and multidimensional 
+License:  file LICENSE
+Encoding: UTF-8
+LazyData: true
+DataVersion: 0.1.8
+Roxygen: list(markdown = TRUE)
+Date: 2020-03-27
+Depends:
+    R (>= 3.5.0)
+biocViews:
+Suggests: 
+  DataPackageR,
+  dplyr,
+  filenamer,
+  GGally,
+  ggplot2,
+  ggpubr,
+  grid,
+  gridExtra,
+  kableExtra,
+  knitr,
+  lattice,
+  limma,
+  magrittr,
+  motifStack,
+  plotly,
+  RColorBrewer,
+  readxl,
+  reshape2,
+  rmarkdown,
+  tibble,
+  tidyverse,
+  universalmotif,
+  xlsx,
+  yaml
+VignetteBuilder: knitr
+RoxygenNote: 7.1.0

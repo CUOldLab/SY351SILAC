@@ -1,0 +1,219 @@
+---
+title: "Processing of Syros SY-351 1h HL-60 SILAC phosphoproteome data"
+author: "William M. Old, Zachary Poss, Jeremy Jacobsen"
+date: "March 19, 2020"
+output:
+  html_document
+
+---
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 8, collapse = F)
+```
+
+
+This is the first of five R markdown (Rmd) files used to generate the vignettes in the SY351SILAC data package:
+
+1. **parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd**
+1. analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. make_site_table_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. prepare_analyze_momo_motif_analysis.Rmd
+1. parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+This R markdown file is part of the SY351SILAC package and does not need to be run if the phosphosites data frame
+is available through the SY351SILAC data package. It is provided here to document code used to generate the 
+phosphosites data frame, which is a table of the phosphorylation site-level SILAC ratios.
+(the data frame is a tbl_df or tibble - see dplyr package and tidyverse in general for info)
+
+```{r loading-libs, message=FALSE}
+library(tidyverse)
+require(DataPackageR)
+require(magrittr)
+require(dplyr)
+
+options(stringsAsFactors = FALSE)
+# define functions
+# 
+source( DataPackageR::project_path('data-raw/get.protein.meta.data.R'))
+source( DataPackageR::project_path('data-raw/extract.first.id.R'))
+
+```
+
+### Set up important parameters
+```{r paramsetup}
+
+# This is the MaxQuant PhosphoSTY.txt file that has been processed with Perseus:
+# 1. Expand site table (deal with multiply phosphorylated sites)
+# 2. to add site-specific annotations to each site.
+new_phosphosite_file_name <- "sy351_hl60_psites_phosphosty_perseusannotated.txt.gz"
+
+# This file contains protein-level annotations to the site table by Perseus,
+# which can be merged using the key column "Unique.identifier" (which is converted to ID in downstream statistical analysis tables)
+protein_meta_data_file <- "PerseusProtMeta_PhosphoSTY_combined_allPhospho_HL60s_10-25-2017.txt.gz"
+
+# any log2 ratios greater than this will be filtered out
+maxlog2ratiothresh <- 7 
+
+```
+### Set up the targets data frame
+This sets up the target matrix that maps sample names with sample SILAC ratios (column names in PhosphoSTY.txt file)
+and which samples were labeled with what SILAC label.
+Make sure the the target data frame has two columns: Light and Heavy
+which indicates the sample's SILAC label.
+targets. e.g. for a label-swap design.
+    
+ 
+```{r targets}
+
+targets <- data.frame(samples = c('null','rep1','rep2','rep3LF'),
+                      Light = c("DMSO","DMSO","DMSO","SY351"),
+                      Heavy  = c("DMSO","SY351","SY351","DMSO"),
+                      samplenames = c("Ratio.H.L.normalized.null",
+                                      "Ratio.H.L.normalized.rep1",
+                                      "Ratio.H.L.normalized.rep2",
+                                      "Ratio.H.L.normalized.rep3LF"))
+targets
+```
+
+* **samples**: text field with the sample name used in downstream analysis. Data column names will be changed to this field's value.  
+* **samplenames**: text field with name of the column in the PhosphoSTY.txt file that has been processed by Perseus.  
+* **Light**: text field indicating which experimental treatment group was SILAC labeled with (unlabeled) amino acids.  
+* **Heavy**: text field indicating which experimental treatment group was SILAC labeled with heavy amino acids.
+
+### Read in the Perseus annotated MaxQuant PhosphoSTY.txt file 
+The file phosphosite_file_name: `r new_phosphosite_file_name` is the MaxQuant PhosphoSTY.txt 
+file that has been processed with Perseus:
+
+1.To expand site table (deal with multiply phosphorylated sites)
+
+2.To add site-specific annotations to each site.
+
+```{r read_psites}
+
+new_phosphosite_file_name_full <- DataPackageR::project_extdata_path(new_phosphosite_file_name)
+
+#psitecols <- unlist(strsplit( readr::read_lines(new_phosphosite_file_name_full, n_max = 1), "\t"))
+#psitecols <-  make.names(psitecols)
+
+phosphosites <- read.table(gzfile(new_phosphosite_file_name_full),
+                  header = T,
+                  fill = T,
+                  stringsAsFactors = F, 
+                  na.strings = "NaN", 
+                  sep = "\t",
+                  quote = "\"", # Important because using the default "\"'" will not read file properly
+                  comment.char = "#")
+
+
+phosphosites <- dplyr::as_tibble(phosphosites)
+
+
+phosphosites <- phosphosites[phosphosites$Reverse != "+",]
+
+phosphosites <- phosphosites[!is.na(phosphosites$Unique.identifier),]
+
+phosphosites <- phosphosites %>% mutate(psite = paste(phosphosites$Amino.acid, phosphosites$Position, sep=""))
+```
+
+### Rename the data columns in phosphosites to the values in "samples" column in target data frame
+```{r rename_cols_psites}
+names(phosphosites)[names(phosphosites) %in% targets$samplenames] 
+
+names(phosphosites)[names(phosphosites) %in% targets$samplenames] <- as.character(targets$samples)
+
+targets$samples
+```
+
+### Log2 scale the data columns (SILAC ratios), and remove extreme outliers 
+
+```{r log2scale}
+summary(phosphosites[,targets$samples])
+
+# !!! Comment if the ratios have  been log2 transformed. 
+# In this case they have not been log2 transformed
+if (!any(phosphosites[,targets$samples] < 0, na.rm = T )) {
+  phosphosites[,targets$samples] <- log2(phosphosites[,targets$samples])
+}
+
+summary(phosphosites[,targets$samples])
+
+
+# Remove two extreme outliers in the null and rep3LF columns
+# 
+phosphosites <- phosphosites %>%
+  dplyr::filter(is.na(null) | (abs(null) < abs(maxlog2ratiothresh))) %>%
+  dplyr::filter(is.na(rep3LF) | (abs(rep3LF) < abs(maxlog2ratiothresh))) 
+
+  
+
+summary(phosphosites %>% select(Gene.names, targets$samples))
+
+
+```
+
+### Tabulate the number of valid values for each phosphosite
+```{r}
+phosphosites$numvalid <- apply(phosphosites[,targets$samples], 1, function(x) sum(!is.na(x)))
+table(phosphosites$numvalid)
+
+# 2     3     4 
+# 3295  4632 16614 
+
+phosphosites$numvalid_trt <- apply(phosphosites[,c('rep1','rep2','rep3LF')], 1, function(x) sum(!is.na(x)))
+table(phosphosites$numvalid_trt)
+
+```
+
+```{r merge_with_protein_level_metadata}
+
+protmeta <- get.protein.meta.data(DataPackageR::project_extdata_path(protein_meta_data_file), 
+                                  absfilepath = NULL,
+                                  is_gzip_file = T)
+
+# Select only columns in protmeta that are NOT found in phosphosites 
+# and keep the phosphorylation site file PhosphoSTY.txt key column "Unique.identifier" 
+
+
+protmeta <- protmeta %>% select(Unique.identifier,
+                    names(protmeta)[!names(protmeta) %in% names(phosphosites)])
+
+# Use the protmeta Gene.name column, and remove it from phosphosites if it exists
+if (any(grepl("Gene.name$", names(protmeta))) & any(grepl("Gene.name$", names(phosphosites)))) {
+  phosphosites <- phosphosites %>% select(-Gene.name)
+}
+
+# > dim(protmeta)
+# [1] 29541    43
+# > dim(phosphosites)
+# [1] 29539   227
+
+cols2keep <- c("Gene.name", "UniProt.names", "Leading.proteins", "Protein", "Proteins", "Protein.name", 
+  "Interpro.name", "Prosite.name", "proteinclass", "Positions.within.proteins", "Pfam")
+
+phosphosites <- phosphosites %>% 
+  left_join(protmeta %>% select(Unique.identifier,cols2keep[cols2keep %in% names(protmeta)]),
+            by = "Unique.identifier")
+
+# phosphosites %>% str(list.len = Inf)
+
+tmp <- strsplit( phosphosites$Gene.name, ";")
+table(sapply(tmp, length))
+
+# phosphosites %>% dplyr::filter( sapply(tmp, length) == 0) %>% str(list.len = Inf)
+
+phosphosites <- phosphosites %>% mutate(Gene.name = extract.first.id(phosphosites$Gene.names))
+
+phosphosites <- phosphosites %>% tibble::add_column(uniprot.acc.leading = extract.first.id(phosphosites$Leading.proteins))
+
+phosphosites <- phosphosites %>% tibble::add_column(gene.psite = paste(phosphosites$Gene.name, phosphosites$psite, sep="."))
+
+#psitestats$gene.psite <- paste(psitestats$Gene.name, psitestats$psite, sep=".")
+
+# tmp <-  phosphosites %>%  add_count(Leading.proteins, psite, Sequence.window, name = "ndupsites_withmult") %>% 
+#   arrange(desc(ndupsites_withmult), Leading.proteins,  psite, Sequence.window, desc(Intensity))
+# 
+# tmp %>% dplyr::filter(ndupsites_withmult > 1) %>%
+#   View()
+
+
+```
+

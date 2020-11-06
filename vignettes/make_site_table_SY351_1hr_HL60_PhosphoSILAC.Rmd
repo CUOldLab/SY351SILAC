@@ -1,0 +1,189 @@
+---
+title: Create PhosphoSite Tables for Syros SY-351 1h HL-60 SILAC phosphoproteome data
+author: William M. Old, Zachary Poss, Jeremy Jacobsen
+date: March 19, 2020
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Create PhosphoSite Tables for Syros SY-351 1h HL-60 SILAC phosphoproteome data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 8, collapse = F)
+```
+
+This vigette documents the generation of the phosphorylation site-level and phosphoprotein summary tables in Poss et. al. 
+This is the third of five R markdown (Rmd) files used to generate the vignettes in the SY351SILAC data package:
+
+1. parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. **make_site_table_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd**
+1. prepare_analyze_momo_motif_analysis.Rmd
+1. parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+
+```{r loading-libs, message=FALSE}
+library(tidyverse)
+require(DataPackageR)
+require(magrittr)
+require(dplyr)
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+library("readxl")
+library("xlsx")
+
+#options(tibble.width = 200)
+
+fdr.thresh.fortables <- 0.01
+logfc.ratio.threshold <- 0.5
+logfc.ratio.down.threshold <- -0.5
+
+# File name for writing out an excel file with the two tables generated in this vignette.
+site_table_file_name <- 'Syros_SY351_SILAC_SiteTableForPaper_test_20200324.xlsx'
+
+options(stringsAsFactors = FALSE)
+
+# When running this example as a standalone Rmd file, the line below will need to be changed to 
+# import the psitestats data frame from elsewhere. This line is used by
+# DataPackageR to generate vigenettes from this Rmd file during data package generation 
+# for the SY351SILAC data package.
+
+psitestats <- DataPackageR::datapackager_object_read("psitestats")
+#base::load( file = 'psitestats.Rda')
+
+# define functions
+# 
+source( DataPackageR::project_path('data-raw/get.protein.meta.data.R'))
+source( DataPackageR::project_path('data-raw/extract.first.id.R'))
+
+combine.strs.withcr <- function(x, numperline = 2) {
+  x <- sort(unique(unlist(strsplit(x, ";"))))
+  x <- Map(`c`, 
+           split(x, (seq_along(x) - 1) %/% numperline + 1),
+           c('\n'))
+  x <- lapply(x, function(z) {
+    paste(z, c(rep(',', length(z) - 1), rep('',1)), sep = '')
+  })
+  
+  x[[length(x)]] <- gsub(",\n$","",x[[length(x)]], perl = T)
+  
+  
+  x <- paste(unlist(x,use.names = F), collapse = '')
+  gsub(',\n$', '', x)
+}
+
+# tmp <- unlist(strsplit( psitestats.protein.totals$phospho_sites2[1], ";"))
+# combine.strs.withcr(tmp, 3)
+
+combine.strs <- function(x) {
+  paste(sort(unique(unlist(strsplit(x, ";")))),
+        collapse = ", ")
+}
+
+
+count.kinases <- function(x) {
+  length(unique(unlist(strsplit(x, ";"))))
+}
+```
+
+
+
+### Group and calculate some group summary fields and rename columns for final tables
+```{r}
+
+
+psitestats.grp <- psitestats %>% dplyr::filter(adj.P.Val.nullfiltisotope < fdr.thresh.fortables) %>% group_by(uniprot.acc.leading, Gene.name) %>%
+  mutate(numsig.down = sum(adj.P.Val.nullfiltisotope < fdr.thresh.fortables &
+                             logFC.nullfiltisotope < 0, na.rm = T),
+         numsig.up = sum(adj.P.Val.nullfiltisotope < fdr.thresh.fortables &
+                           logFC.nullfiltisotope < 0, na.rm = T),
+         min.log2fc = min(logFC.nullfiltisotope, na.rm = T)) %>%
+  
+  dplyr::arrange(desc(numsig.down), min.log2fc, Gene.name, uniprot.acc.leading, Position) %>% ungroup() %>%
+  select(Gene.name, uniprot.acc.leading, psite,logFC.nullfiltisotope, adj.P.Val.nullfiltisotope,  Seqwin,  
+         PhosphoSitePlus.kinase,Regulatory.site.function,  proteinclass,
+         numsig.down, numsig.up) %>% 
+  dplyr::rename(Gene = Gene.name,
+         UniprotAcc = uniprot.acc.leading,
+         PSite = psite,
+         Log2FC = logFC.nullfiltisotope,
+         AdjPval = adj.P.Val.nullfiltisotope,
+         PSeqWin = Seqwin) 
+
+
+psitestats.grp %>% print(width = 500)
+
+
+psitestats.grp.down <- psitestats.grp %>% dplyr::filter(numsig.down > 0)
+
+
+psitestats %>% group_by(uniprot.acc.leading, Gene.name) %>%
+  dplyr::summarize(upstream_kinases = combine.strs(PhosphoSitePlus.kinase),
+            num_kinases = count.kinases(PhosphoSitePlus.kinase)) %>%
+  dplyr::arrange(desc(num_kinases))
+
+
+psitestats.protein.totals <- psitestats %>% dplyr::filter(adj.P.Val.nullfiltisotope < fdr.thresh.fortables &
+                                             logFC.nullfiltisotope < logfc.ratio.down.threshold) %>%
+  group_by(uniprot.acc.leading, Gene.name, proteinclass) %>%
+  summarise(numsig.down = n(),
+            min.adj.pval = min(adj.P.Val.nullfiltisotope, na.rm = T),
+         min.log2fc = min(logFC.nullfiltisotope, na.rm = T),
+         phospho_sites = combine.strs.withcr(psite, numperline = 3),
+         phospho_sites2 = combine.strs(psite),
+         upstream_kinases = combine.strs(PhosphoSitePlus.kinase),
+         num_kinases = count.kinases(PhosphoSitePlus.kinase)) %>%
+  dplyr::filter(numsig.down > 0) %>%
+  dplyr::arrange(desc(numsig.down), min.log2fc, Gene.name, uniprot.acc.leading) %>% ungroup() %>%
+  dplyr::select(uniprot.acc.leading, Gene.name, proteinclass,  phospho_sites, phospho_sites2,
+         numsig.down, min.log2fc,min.adj.pval, upstream_kinases) %>% 
+  dplyr::rename(Gene = Gene.name, protein_function = proteinclass, high_conf_sites = phospho_sites,
+         Uniprot_Acc = uniprot.acc.leading)
+
+
+psitestats.protein.totals <- psitestats.protein.totals %>% 
+  select(Uniprot_Acc, Gene, protein_function, high_conf_sites, numsig.down, min.log2fc, min.adj.pval) 
+
+psitestats.protein.totals
+```
+
+### Write out to excel file for publication
+```{r}
+
+
+wb <- createWorkbook() 
+cswrap <- CellStyle(wb, alignment = Alignment(wrapText = TRUE,
+                                          horizontal = "ALIGN_LEFT",
+                                          vertical = "VERTICAL_TOP"))
+csnowrap <- CellStyle(wb, alignment = Alignment(wrapText = F,
+                                              horizontal = "ALIGN_LEFT",
+                                              vertical = "VERTICAL_TOP"))
+
+
+stylelist <- rep(list( csnowrap), dim(psitestats.protein.totals)[2] )
+names(stylelist) <- 1:dim(psitestats.protein.totals)[2]
+stylelist[[as.character(which(names(psitestats.protein.totals) == 'high_conf_sites'))]] <- cswrap
+
+sheet <- createSheet(wb, sheetName = "PhosphoProtein_Summary_DecreasedSites")
+
+addDataFrame(as.data.frame( psitestats.protein.totals), sheet,
+             row.names = F,
+             colStyle = stylelist)
+
+cb2 <- CellBlock(sheet, startRow = 2,
+                startColumn = 1, 
+                noRows = dim(psitestats.protein.totals)[1], 
+                noColumns = dim(psitestats.protein.totals)[2],
+                create = F)
+
+CB.setColData(cb2, psitestats.protein.totals$high_conf_sites, colIndex = which(names(psitestats.protein.totals) == 'high_conf_sites'), colStyle = cswrap)
+
+autoSizeColumn(sheet, 1:dim(psitestats.protein.totals)[2])
+
+saveWorkbook(wb, site_table_file_name )
+
+```
+
+

@@ -1,0 +1,559 @@
+---
+title: Generation of input files (and downstream analysis) for motif analysis using
+  MoMo for Syros SY-351 1h HL-60 SILAC phosphoproteome data
+author: William M. Old, Zachary Poss, Jeremy Jacobsen
+date: March 19, 2020
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Generation of input files (and downstream analysis) for motif analysis using MoMo for Syros SY-351 1h HL-60 SILAC phosphoproteome data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+  ```{r, setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 8, collapse = F)
+```
+
+### Motif analysis of phosphorylation sites showing significant change with CDK7 inhibition in HL60 cells
+This is the fourth of five R markdown (Rmd) files used to generate a vignette on motif analysis, with data documented in the SY351SILAC data package. This Rmd file should be processed only after running the first three Rmd files if the phosphosites and psitestats data frames are not in the user's environment.
+
+1. parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. make_site_table_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. **prepare_analyze_momo_motif_analysis.Rmd**
+1. parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd
+
+  
+This analysis generates the input files required for  MoMo analysis (MeMe suite) <http://meme-suite.org/>  
+MoMo identifies enriched sequence motifs in a set of phosphorylated sequences
+compared to a background set. The sequences should be centered on the 
+phosphorylated residue.  
+
+The output files are written to a subdirectory './inst/extdata' relative to the project or data package root directory.  
+The momo output files (directories) should be copied as subdirectories of './inst/extdata':  
+ e.g. './inst/extdata/motif_analysis/sy351_dn_final_motifs/momo.tsv'  
+  
+
+```{r loading-libs, message=FALSE}
+#library(dplyr)
+library(tidyverse)
+library("ggpubr")
+library(universalmotif)
+library(motifStack)
+library(ggplot2)
+library(kableExtra)
+
+psitestats <- DataPackageR::datapackager_object_read("psitestats")
+
+# Set parameters
+# 
+adj_pval_thresh <- 0.1
+
+log2fc_thresh <- 0
+
+adj_pval_thresh_background <- 0.3 
+
+log2fc_thresh_background <- 0.1
+
+phseqlen <- 13 # Intended length of final phosphosequence window to submit to MoMo
+
+# Functions
+
+getmotifmatches <- function(themotif, theseqs) {
+  if(nchar(themotif) != max(nchar(theseqs))) {
+    stop("legnth of the motif does not match the length of phosphosite sequences!")
+  }
+  grep(themotif, theseqs,
+       ignore.case = T) 
+} 
+getdfmotifmatches <- function(themotif, theseqs, log2FC) {
+  if(nchar(themotif) != max(nchar(theseqs))) {
+    stop("legnth of the motif does not match the length of phosphosite sequences!")
+  }
+  inds <- grep(themotif, theseqs,
+       ignore.case = T) 
+  tmpdf <- data.frame(rowid = inds,
+             motif = as.character(rep_len(themotif, length(inds))),
+             seqwin = as.character(theseqs[inds]),
+             log2FC = log2FC[inds],
+             stringsAsFactors = F)
+  tmpdf[!is.na(tmpdf$log2FC),]
+} 
+
+```
+
+Ensure the centered phosphosite sequence window is set to approriate length
+and the "_" characters that MaxQuant denotes as positions beyond N- and C-termini
+of protein sequence are converted to "X" for MoMo analysis (MeMe suite)
+
+```{r generate_momo_input}
+
+
+upseqs <- psitestats %>% dplyr::filter(adj.P.Val.nullfiltisotope < adj_pval_thresh &
+                    logFC.nullfiltisotope > log2fc_thresh) %>% pull(Seqwin) %>% unique()
+
+dnseqs <- psitestats %>% dplyr::filter(adj.P.Val.nullfiltisotope < adj_pval_thresh &
+                              logFC.nullfiltisotope < -log2fc_thresh) %>% pull(Seqwin) %>% unique()
+
+dnseqdf <- psitestats %>% dplyr::filter(adj.P.Val.nullfiltisotope < adj_pval_thresh &
+                              logFC.nullfiltisotope <  -log2fc_thresh) %>% select(ID,gene.psite, gene.psite.kinase,Seqwin , Sequence.window)
+
+#dnseqdf %>% dplyr::filter(grepl('RGPD3', gene.psite))
+
+fastatxt <- paste( paste('>', dnseqdf$gene.psite,'.', dnseqdf$ID,sep=''),
+                   dnseqdf$Seqwin, sep='\n')
+                   
+writeLines(fastatxt, con = file.path(DataPackageR::project_extdata_path(),'dnseq_fasta.txt'))
+
+bgseqs <- unique(psitestats$Seqwin[psitestats$adj.P.Val.nullfiltisotope > adj_pval_thresh_background & 
+                                   abs(psitestats$logFC.nullfiltisotope) < log2fc_thresh_background]) 
+bgseqs <- bgseqs[!is.na(bgseqs)]
+bgseqs <- bgseqs[!bgseqs %in% c(upseqs,dnseqs)]
+
+allseqs <- unique(psitestats$Seqwin)
+allseqs <- allseqs[!is.na(allseqs)]
+
+
+write.table(upseqs,file= file.path(DataPackageR::project_extdata_path(), 'upseqs_FINAL.txt'),
+            quote = F,sep = '\t',na = "",row.names = F,col.names = F)
+
+write.table(dnseqs,file= file.path(DataPackageR::project_extdata_path(), 'dnseqs_FINAL.txt'),
+            quote = F,sep = '\t',na = "",row.names = F,col.names = F)
+
+write.table(c(upseqs,dnseqs),file= file.path(DataPackageR::project_extdata_path(), 'upanddnseqs_FINAL.txt'),
+            quote = F,sep = '\t',na = "",row.names = F,col.names = F)
+
+write.table(bgseqs,file= file.path(DataPackageR::project_extdata_path(), 'bgseqs_FINAL.txt'),
+            quote = F,sep = '\t',na = "",row.names = F,col.names = F)
+
+```
+
+
+## STOP HERE to run MoMo. Transfer the above files to the server with MoMo & Ceqlogo installed (Meme suite) 
+1. Run MoMo on each file for up and down sites, e.g.:
+    momo motifx --oc sy351_dn_final_motifs --width 13 --min-occurrences 10 --remove-unknowns F --verbosity 4 dnseqs_FINAL.txt
+1. Tranfer the subdirectory containing the momo.tsv file for each MoMo analysis. In this case there were two (see below) 
+
+```{r parse_momo_output}
+
+
+##########################
+# Parse momo.tsv output 
+#
+
+          
+momo_down <- read.table(file.path(DataPackageR::project_extdata_path('motif_analysis/sy351_dn_final_motifs/momo.tsv')),
+                        header = T, comment.char = "#", stringsAsFactors = F)
+
+
+momo_up <- read.table(file.path(DataPackageR::project_extdata_path('motif_analysis/sy351_up_final_motifs/momo.tsv')),
+                      header = T, comment.char = "#", stringsAsFactors = F)
+
+
+momo_down_motifs <- momo_down$regexp
+
+momo_up_motifs <- momo_up$regexp
+
+```
+
+```{r motif_matching}
+
+
+dn_ind_list <- lapply(momo_down_motifs,getmotifmatches, psitestats$Seqwin)
+up_ind_list <- lapply(momo_up_motifs,getmotifmatches, psitestats$Seqwin)
+#unlist(lapply(dn_ind_list, length))
+#unlist(lapply(up_ind_list, length))
+
+allinds <- 1:length(psitestats$logFC.nullfiltisotope)
+matchinds <- sort(unique(unlist(dn_ind_list)))
+unmatchinds <- allinds[!allinds %in% matchinds]
+
+fg_dn_list <- lapply(momo_down_motifs,getmotifmatches, dnseqs)
+fg_up_list <- lapply(momo_up_motifs,getmotifmatches, upseqs)
+
+#unlist(lapply(fg_dn_list, length))
+#unlist(lapply(fg_up_list, length))
+
+#psitestats$motif1 <- 'background'
+#psitestats$motif1[fg_dn_list[[1]]] <- momo_down_motifs[1]
+
+dn_list <- lapply(momo_down_motifs,getdfmotifmatches, psitestats$Seqwin, psitestats$logFC.nullfiltisotope)
+names(dn_list) <- momo_down_motifs
+up_list <- lapply(momo_up_motifs,getdfmotifmatches, psitestats$Seqwin, psitestats$logFC.nullfiltisotope)
+names(up_list) <- momo_up_motifs
+
+up_list[["allseqs"]] <- dn_list[["allseqs"]] <- data.frame(rowid = allinds,
+                                   motif = 'allseqs',
+                                   seqwin = psitestats$Seqwin,
+                                   log2FC = psitestats$logFC.nullfiltisotope,
+                                   stringsAsFactors = F)
+
+dn_list <- dn_list[c(momo_down$regexp, "allseqs")]
+
+up_list <- up_list[c(momo_up$regexp, "allseqs")]
+
+
+dndf <- bind_rows(dn_list, .id = "motifid") 
+dndf$motif <- factor(dndf$motif, levels = c(momo_down$regexp, "allseqs"))
+
+updf <- bind_rows(up_list, .id = "motifid") 
+updf$motif <- factor(updf$motif, levels = c(momo_up$regexp, "allseqs"))
+
+# names(table(dndf$motif))
+# names(table(updf$motif))
+
+```
+
+###  Log2 ratio distributions for enriched motifs (violin plots)
+
+```{r plot_ratio_dists}
+#dndf <- dndf[dndf$motifid != "unmatched",]
+#my_comparisons <- lapply(momo_down_motifs, c, "unmatched") # list( names(table(psitestats$motif1)) )
+
+anno_dn_df <- ggpubr::compare_means(log2FC ~ motif,  data = dndf, ref.group = "allseqs",
+                         method = "wilcox.test") %>% select(-p.format, -p.signif ) %>%
+  mutate(x.pos = -2, log2r.shift.p.adj = format.pval(p.adj, digits = 2), y.position = 3) %>% 
+  full_join(momo_down %>% select(regexp, motif, score, fg_match, adjusted_p.value), 
+                      by = c("group2" = "regexp")) %>%
+  mutate(motifx_p.adj = format.pval(adjusted_p.value, digits = 2)) %>%
+  dplyr::filter(adjusted_p.value < 0.01 )
+
+anno_up_df <-  ggpubr::compare_means(log2FC ~ motif,  data = updf, ref.group = "allseqs",
+                            method = "wilcox.test") %>% select(-p.format, -p.signif ) %>%
+  mutate(x.pos = -2, log2r.shift.p.adj = format.pval(p.adj, digits = 2), y.position = 3) %>% 
+  full_join(momo_up %>% select(regexp, motif, score, fg_match, adjusted_p.value), 
+                                       by = c("group2" = "regexp")) %>%
+  mutate(motifx_p.adj = format.pval(adjusted_p.value, digits = 2)) %>%
+  dplyr::filter(adjusted_p.value < 0.01  )
+
+
+
+padjvals <- p.adjust(c(anno_dn_df$p, anno_up_df$p), method = "BH")
+
+anno_dn_df$p.adj <- padjvals[1:dim(anno_dn_df)[1]]
+anno_up_df$p.adj <- padjvals[(dim(anno_dn_df)[1]+1):(dim(anno_up_df)[1] + dim(anno_dn_df)[1])]
+
+anno_dn_df <- anno_dn_df %>% mutate(log2r.shift.p.adj = format.pval(p.adj, digits = 2))
+anno_up_df <- anno_up_df %>% mutate(log2r.shift.p.adj = format.pval(p.adj, digits = 2))
+
+anno_up_df %>% kable(digits = 2) %>%
+  kable_styling(bootstrap_options = 
+                  c("striped", "hover", "condensed", "responsive"), 
+                font_size = 10) %>% 
+  scroll_box(width = "100%", height = "800px")
+
+
+anno_dn_df %>% kable(digits = 2) %>%
+  kable_styling(bootstrap_options = 
+                  c("striped", "hover", "condensed", "responsive"), 
+                font_size = 10) %>% 
+  scroll_box(width = "100%", height = "800px")
+
+
+
+#anno_up_df$motif15 <- paste('.', anno_up_df$group2, '.', sep = '')
+#anno_dn_df$motif15 <- paste('.', anno_dn_df$group2, '.', sep = '')
+#dim(dndf)
+#dim(updf)
+
+dndf <- dndf %>% dplyr::filter(motifid %in% c(anno_dn_df$group2, "allseqs")) %>% as_tibble()
+updf <- updf %>% dplyr::filter(motifid %in% c(anno_up_df$group2, "allseqs"))  %>% as_tibble()
+
+#compare_means(log2FC ~ motif,  data = dndf, ref.group = ".all.",
+#              method = "wilcox.test", p.adjust.method = "BH")
+dnlen <- length(c(rev(anno_dn_df$group2), "allseqs"))
+dnpal <- get_palette("ucscgb", length(c(rev(anno_dn_df$group2), "allseqs")))
+dnpal <- c(rev(dnpal[1:(dnlen-1)]), dnpal[dnlen])
+
+pdn <- ggviolin(dndf, x = "motif", y = "log2FC", repel = T, fill = "motif",
+              label.rectangle = T, font.x = c(24, "bold"),
+              font.y = c(24, "bold"),font.xtickslab = c(20), font.ytickslab = c(20),
+              order = c(rev(anno_dn_df$group2), "allseqs"),
+              add = "med_sd", add.params = list(fill = "white"), trim = F,
+              legend = "none", orientation = "horizontal",
+              font.family = "mono") +
+              geom_hline(yintercept = 0, linetype = 2) +
+  scale_fill_manual(values = dnpal)
+
+
+anno_dn_df <- anno_dn_df %>% mutate(y.position = -2.0)   
+
+pdn <- pdn +   stat_pvalue_manual(anno_dn_df, y.position = "y.position",
+                       label = "{motifx_p.adj}" ,
+                       remove.bracket = T) 
+
+anno_dn_df <- anno_dn_df %>% mutate(y.position = 1.5)   
+
+pdn <- pdn + 
+  stat_pvalue_manual(anno_dn_df, label = "{log2r.shift.p.adj}" ,remove.bracket = T) 
+ 
+ data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+ }
+ #Use a custom summary function :
+   
+ pdn <- pdn + stat_summary(fun.data=data_summary)
+  
+ 
+ #####
+ # Now for the upregulated motifs
+ ##### 
+ 
+ uplen <- length(c(rev(anno_up_df$group2), "allseqs"))
+ uppal <- get_palette("ucscgb", length(c(rev(anno_up_df$group2), "allseqs")))
+ uppal <- c(rev(uppal[1:(uplen-1)]), uppal[uplen])
+ 
+ pup <- ggviolin(updf, x = "motif", y = "log2FC", fill = "motif",repel = T,
+                 label.rectangle = T, font.x = c(24, "bold"),
+                 font.y = c(24, "bold"),font.xtickslab = c(20), font.ytickslab = c(18),
+                 order = c(rev(anno_up_df$group2), "allseqs"),
+                 add = "med_sd", add.params = list(fill = "white"), trim = T,
+                 legend = "none",  orientation = "horizontal",
+                 font.family = "mono") +
+   geom_hline(yintercept = 0, linetype = 2) +
+   scale_fill_manual(values = uppal)
+ 
+ 
+ anno_up_df <- anno_up_df %>% mutate(y.position = -2.0)   
+ 
+ pup <- pup +   stat_pvalue_manual(anno_up_df, y.position = "y.position", 
+                                   label = "{motifx_p.adj}" ,  #label = "mfx p={motifx_p.adj}" ,
+                                   remove.bracket = T) 
+ 
+ anno_up_df <- anno_up_df %>% mutate(y.position = 1.5)   
+ 
+ pup <- pup + 
+   stat_pvalue_manual(anno_up_df, y.position = "y.position",
+                      label = "{log2r.shift.p.adj}" ,remove.bracket = T) 
+ 
+ 
+ data_summary <- function(x) {
+   m <- mean(x)
+   ymin <- m-sd(x)
+   ymax <- m+sd(x)
+   return(c(y=m,ymin=ymin,ymax=ymax))
+ }
+ #Use a custom summary function :
+ 
+ pup <- pup + stat_summary(fun.data=data_summary)
+ pdn
+ pup
+ ggsave(pdn, device = 'pdf', filename = 'violin_motifplots_down.pdf',
+        path = DataPackageR::project_extdata_path('figures'))
+ 
+ ggsave(pup, device = 'pdf',filename = 'violin_motifplots_up.pdf',
+        path = DataPackageR::project_extdata_path('figures'))
+
+ figure <- ggpubr::ggarrange(pdn, pup, ncol = 1, nrow = 2, align = "v") 
+                     # heights =  c(12,19)/(12+19))
+ multi_motif_dists_fig <- annotate_figure(figure)
+ 
+ ggsave(multi_motif_dists_fig, device = 'pdf',filename = 'violin_motifplots_both.pdf',
+        path = DataPackageR::project_extdata_path('figures'))
+
+
+# pdf(file = file.path(DataPackageR::project_extdata_path('figures'), 'violin_motifplots_down.pdf'),  
+#                      width = 12, height = length(pfm.meme.dn))
+# pdn
+# dev.off()
+# 
+# pdf(file = file.path(DataPackageR::project_extdata_path('figures'),'violin_motifplots_up.pdf') ,  
+#     width = 12, height = length(pfm.meme.up)/1.5)
+# pup
+# dev.off()
+# 
+# 
+# pdf(file = file.path(DataPackageR::project_extdata_path('figures'),'violin_motifplots_both.pdf'),  
+#     width = 12, height = 20)
+# figure <- ggarrange(pdn, pup, ncol = 1, nrow = 2, align = "v")
+# annotate_figure(figure)
+# 
+# dev.off()
+
+
+
+```
+
+### Prepare input files for the program ceqlogo (Meme suite) that creates stacked Motif figure 
+for motifs enriched in phosphosites that decrease in SY351 treated cells (q < 0.1).
+This also generates batch files for running ceqlogo with the momo.txt output files (generated above)
+Example command:
+```
+~/meme/libexec/meme-5.0.5/ceqlogo -i ./sy351_up_final_motifs/momo.txt   -m  xxxRRx_S_xxxxxx  -m  xxxxxG_S_Pxxxxx  -m  xxxxGx_S_Pxxxxx  -m  xxxRKx_S_xxxxxx  -m  xxxxSx_S_Pxxxxx  -m  xGxxxx_S_Pxxxxx  -m  xxxxxx_S_PxSxxx  -m  xxxxxx_S_DxExxx  -m  KxxRxx_S_xxxxxx  -m  xxxxxx_S_Pxxxxx  -m  xxxRxx_S_xxxxxx  -m  xxxKRx_S_xxxxxx  -m  xxxxxx_S_Lxxxxx  -m  xxxxxx_T_Pxxxxx  -o sy351_up_memelogos_FINAL.png  
+```
+
+```{r prepare_ceqlogo_files}
+# This prepares two batch files for running on linux installations of ceqlogo
+# 'downreg_ceqlogo.sh'
+# 'upreg_ceqlogo.sh'
+
+cmdtxt <- '~/meme/libexec/meme-5.0.5/ceqlogo -i ./sy351_dn_final_motifs/momo.txt '
+ 
+ 
+dncmd <- paste(cmdtxt,
+      paste( rep(" -m ", length(anno_dn_df$motif)), anno_dn_df$motif, collapse = " "),
+      ' -o sy351_dn_memelogos_select.png -f PNG -h  -f PNG -h 85.7 -d \'\' -x \'\' -N  -c 4 -f PNG -w 25',
+      sep = ' ')
+ 
+
+writeLines(dncmd, file.path(DataPackageR::project_extdata_path('motif_analysis'), 'downreg_ceqlogo.sh'))
+
+
+upcmd <- paste( '~/meme/libexec/meme-5.0.5/ceqlogo -i ./sy351_up_final_motifs/momo.txt ',
+               paste( rep(" -m ", length(anno_up_df$motif)), anno_up_df$motif, collapse = " "),
+               ' -o sy351_up_memelogos_select.png -f PNG -h 100 -d \'\' -x \'\' -N  -c 4 -f PNG -w 25',
+               sep = ' ')
+
+writeLines(upcmd,  file.path(DataPackageR::project_extdata_path('motif_analysis'), 'upreg_ceqlogo.sh'))
+
+#~/meme/libexec/meme-5.0.5/ceqlogo -i ./sy351_up_final_motifs/momo.txt   -m  xxxRRx_S_xxxxxx  -m  xxxxxG_S_Pxxxxx  -m  xxxxGx_S_Pxxxxx  -m  xxxRKx_S_xxxxxx  -m  xxxxSx_S_Pxxxxx  -m  xGxxxx_S_Pxxxxx  -m  xxxxxx_S_PxSxxx  -m  xxxxxx_S_DxExxx  -m  KxxRxx_S_xxxxxx  -m  xxxxxx_S_Pxxxxx  -m  xxxRxx_S_xxxxxx  -m  xxxKRx_S_xxxxxx  -m  xxxxxx_S_Lxxxxx  -m  xxxxxx_T_Pxxxxx  -o sy351_up_memelogos_FINAL.png  
+
+```
+
+### After running ceqlogo where meme and momo are installed, 
+the resulting  momo.txt files must be corrected at the line with 'Alphabet= ' 
+The code below performs this correction automatically to make 'Alphabet' uppercase as in 'ALPHABET= '. 
+This will make the read_meme() function work when reading in the motifs from this momo output file
+
+```{r plotstacked_motifs}
+dnmomofile <- DataPackageR::project_extdata_path('motif_analysis/sy351_dn_final_motifs/momo.txt')
+upmomofile <- DataPackageR::project_extdata_path('motif_analysis/sy351_up_final_motifs/momo.txt')
+
+raw_lines <- readLines(con <- file(dnmomofile))
+close(con)
+raw_lines[grepl('Alphabet', raw_lines, ignore.case = T)]
+raw_lines_corr <- gsub('Alphabet=', 'ALPHABET=',raw_lines)
+writeLines(text = raw_lines_corr,  con <- file(dnmomofile))
+close(con)
+rm(raw_lines, raw_lines_corr)
+
+raw_lines <- readLines(con <- file(upmomofile))
+close(con)
+raw_lines[grepl('Alphabet', raw_lines, ignore.case = T)]
+raw_lines_corr <- gsub('Alphabet=', 'ALPHABET=',raw_lines)
+writeLines(text = raw_lines_corr,  con <- file(upmomofile))
+close(con)
+rm(raw_lines, raw_lines_corr)
+
+meme.dn <- read_meme(dnmomofile)
+
+meme.up <- read_meme(upmomofile)
+
+pfm.meme.dn <- universalmotif::convert_motifs(meme.dn, "motifStack-pfm")
+
+dnnames <- unlist(lapply(meme.dn, "[", "altname"))
+upnames <- unlist(lapply(meme.up, "[", "altname"))
+
+pfm.meme.up <- universalmotif::convert_motifs(meme.up, "motifStack-pfm")
+
+
+for (i in 1:length(pfm.meme.up)) {
+  pfm.meme.up[[i]]@name <- upnames[i]
+}
+for (i in 1:length(pfm.meme.dn)) {
+  pfm.meme.dn[[i]]@name <- dnnames[i]
+}
+
+names(pfm.meme.up) <- upnames
+names(pfm.meme.dn) <- dnnames
+
+#names(pfm.meme.dn) %in% anno_dn_df$group2
+
+pfm.meme.up <- pfm.meme.up[names(pfm.meme.up) %in% anno_up_df$group2]
+
+
+# 
+# pdf(file = file.path(DataPackageR::project_extdata_path('figures'),'motif_stack_down_motifs.pdf'),  
+#     width = 6, height = length(pfm.meme.dn))
+# motifStack::plotMotifLogoStack(rev(pfm.meme.dn), font = "mono,Courier", ncex = 0.1)
+# dev.off()
+# 
+# #grDevices::windows(width = 6, height = length(pfm.meme.up))
+# 
+# pdf(file = file.path(DataPackageR::project_extdata_path('figures'), 'motif_stack_up_motifs.pdf'),  
+#     width = 6, height = length(pfm.meme.up))
+# motifStack::plotMotifLogoStack(rev(pfm.meme.up), font = "mono,Courier", ncex = 0.1)
+# dev.off()
+
+
+
+
+numlogos <- 12
+nf <- 1/numlogos
+ymin = seq(nf/2, 1-(nf/2), by = nf)
+ymax <-  seq(nf/2, 1-(nf/2), by = nf)+(nf/2)
+dfplot <- data.frame(xmin = rep(0.05, numlogos), ymin = ymin, xmax = rep(0.95, numlogos), ymax = ymax,
+  fontfamily = rep("mono,Courier", numlogos), fontface = rep(2, numlogos))
+dfplot$motif <- pfm.meme.dn
+dfplot$ind <- 1:length(dfplot$motif)
+
+phos.seqs <- AAStringSet(x = psitestats$Seqwin)
+# scan_sequences(meme.dn, phos.seqs)
+###
+
+
+getpsitestatsmotifmatches <- function(themotif, adj.p.val.thresh = 0.1, up = T, tmpdf) {
+  if(nchar(themotif) != max(nchar(tmpdf$Seqwin))) {
+    stop("legnth of the motif does not match the length of phosphosite sequences!")
+  }
+  inds <- grep(themotif, tmpdf$Seqwin,
+               ignore.case = T) 
+  tmpdf <- tmpdf[inds,]
+  tmpdf <- tmpdf[!is.na(tmpdf$logFC.nullfiltisotope) & !is.na(tmpdf$adj.P.Val.nullfiltisotope),]
+  
+  if (up) {
+    tmpdf <- tmpdf %>% dplyr::filter(adj.P.Val.nullfiltisotope < adj.p.val.thresh &
+                                 logFC.nullfiltisotope > 0)  
+  } else {
+    tmpdf <- tmpdf %>% dplyr::filter(adj.P.Val.nullfiltisotope < adj.p.val.thresh &
+                                 logFC.nullfiltisotope < 0)
+  }
+  
+  tmpdf
+  
+} 
+
+dn_dfdata_list <- lapply(anno_dn_df$group2,getpsitestatsmotifmatches, 
+                         adj.p.val.thresh = 0.05, up = F, tmpdf = psitestats)
+  names(dn_dfdata_list) <- anno_dn_df$group2
+
+up_dfdata_list <- lapply(anno_up_df$group2,getpsitestatsmotifmatches, 
+                           adj.p.val.thresh = 0.05, up = T, tmpdf = psitestats)
+  names(up_dfdata_list) <- anno_up_df$group2
+  
+  
+getgenes <- function(dftmp) {
+  sort(unique(dftmp$Gene.name[dftmp$Gene.name != '' & !is.na(dftmp$Gene.name)]))
+}
+getkinases <- function(dftmp) {
+  kins <- dftmp$PhosphoSitePlus.kinase[dftmp$PhosphoSitePlus.kinase != '' & !is.na(dftmp$PhosphoSitePlus.kinase)]
+  sort(table(kins),decreasing = T)
+}
+
+# lapply(dn_dfdata_list, getgenes)
+# lapply(dn_dfdata_list, getkinases)
+
+
+upgenes <- lapply(up_dfdata_list, getgenes)
+dngenes <- lapply(dn_dfdata_list, getgenes)
+
+upkinases <- lapply(up_dfdata_list, getkinases)
+dnkinases <- lapply(dn_dfdata_list, getkinases)
+```
+
+
+```{r writeout_motif_files, echo = F, eval = FALSE}
+sapply(names(up_dfdata_list), function(x) {
+  
+  writeLines(upgenes[[x]], file.path(DataPackageR::project_extdata_path('motif_analysis'),paste('upgenes_motif_', x, '.txt', sep = '')) )
+})
+
+sapply(names(dn_dfdata_list), function(x) {
+  
+  writeLines(dngenes[[x]], file.path(DataPackageR::project_extdata_path('motif_analysis'),paste('dngenes_motif_', x, '.txt', sep = '')))
+})
+```
+

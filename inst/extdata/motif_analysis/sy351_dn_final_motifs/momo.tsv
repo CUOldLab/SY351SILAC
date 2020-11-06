@@ -1,0 +1,17 @@
+mod	motif	regexp	score	fg_match	fg_size	bg_match	bg_size	fg/bg	unadjusted_p-value	tests	adjusted_p-value
+T	xxxxxx_T_PxKxxx	......TP.K...	123.09	35	241	1	241	35.0	1.5e-010	219	3.3e-008
+T	xxxxxx_T_PxxxxK	......TP....K	94.34	28	241	2	241	14.0	2.1e-007	186	3.9e-005
+T	xxxxxx_T_PxxxRx	......TP...R.	73.84	22	241	1	241	22.0	1.8e-006	159	2.9e-004
+T	xxxxxx_T_Pxxxxx	......TP.....	56.77	197	241	42	241	4.7	1.5e-048	127	1.9e-046
+S	xxxxxL_S_Pxxxxx	.....LSP.....	223.79	61	844	3	844	20.3	8.6e-016	360	3.1e-013
+S	xxTxxx_S_Pxxxxx	..T...SP.....	176.23	31	844	2	844	15.5	5.1e-008	346	1.8e-005
+S	xxAxxx_S_Pxxxxx	..A...SP.....	161.08	53	844	5	844	10.6	8.7e-012	343	3.0e-009
+S	xxxDxx_S_Pxxxxx	...D..SP.....	138.02	29	844	2	844	14.5	1.9e-007	335	6.3e-005
+S	xxxxxG_S_Pxxxxx	.....GSP.....	125.15	55	844	8	844	6.9	2.5e-010	333	8.3e-008
+S	xxxxxx_S_PxKxxx	......SP.K...	104.27	55	844	6	844	9.2	1.3e-011	320	4.2e-009
+S	Qxxxxx_S_Pxxxxx	Q.....SP.....	88.27	28	844	2	844	14.0	3.6e-007	307	1.1e-004
+S	xxxxxx_S_Pxxxxx	......SP.....	75.17	508	844	124	844	4.1	2.5e-087	302	7.5e-085
+
+# MoMo (Modification Motifs): Version 5.0.5 compiled on Jun 20 2019 at 19:16:05
+# The format of this file is described at http://meme-suite.org//doc/momo-output-format.html.
+# momo motifx --oc sy351_dn_final_motifs --width 13 --min-occurrences 10 --remove-unknowns F --verbosity 4 dnseqs_FINAL.txt

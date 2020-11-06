@@ -1,0 +1,289 @@
+---
+title: Analysis of Zach Poss' SY351 (Syros covalent CDK7 inhibitor) treated HL-60
+  proteome SILAC data
+author: William M. Old, Zachary Poss, Jeremy Jacobsen
+date: March 19, 2020
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Analysis of Zach Poss' SY351 (Syros covalent CDK7 inhibitor) treated HL-60 proteome SILAC data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 8, collapse = F)
+```
+
+This is the fifth of five R markdown (Rmd) files used to generate vignettes in the SY351SILAC data package:
+
+1. parse_process_phosphodata_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. analyze_phospho_data_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. make_site_table_SY351_1hr_HL60_PhosphoSILAC_ZPoss_WOld.Rmd
+1. prepare_analyze_momo_motif_analysis.Rmd
+1. **parse_analyze_proteomedata_SY351_1hr_HL60_PhosphoSILAC.Rmd**
+
+```{r, include=FALSE}
+library(DataPackageR)
+library(limma)
+library(lattice)
+library(grid)
+library(gridExtra)
+library(tidyverse)
+library(kableExtra)
+
+# define parameters
+numvalid_thresh <- 3
+fdr.thresh <- 0.05
+
+#abs_null_log2ratio_thresh <- 2 
+
+# define functions
+# 
+options(stringsAsFactors = FALSE)
+# define functions
+# 
+source( DataPackageR::project_path('data-raw/fdrfunctions.R'))
+source( DataPackageR::project_path('data-raw/silac_model_matrix.R'))
+source( DataPackageR::project_path('data-raw/ggvolcano.R'))
+source( DataPackageR::project_path('data-raw/read_maxquant_proteingroupfile.R'))
+source( DataPackageR::project_path('data-raw/get_toptable.R'))
+
+
+# MaxQuant output file proteinGroups.txt file that has been annotated with protein level info using Perseus.
+# This file must be compressed with gzip (required to get under file size limitation of GitHub)
+# 
+
+proteingroups_file_name <- "proteinGroups_ProteomeOnly_AllReps_1-22-2018_PerseusAnnotated.txt.gz"
+fpath <- DataPackageR::project_extdata_path(proteingroups_file_name)
+
+```
+
+### Read in proteome data into the proteinratios data frame (tbl_df)
+```{r read_proteome_data}
+
+protcols <- unlist(strsplit( readLines(gzfile(fpath) ,n  =  1),"\t"))
+# 
+dattypes <- grep("\\{Type\\}", readLines(gzfile(fpath) ,n  =  2), value = T)
+dattypes <- unlist(strsplit( gsub("#!\\{Type\\}","",dattypes),"\t"))
+# 
+mqdatacolnms <- protcols[dattypes == "E"]
+#mqdatacolnms should be   c("null","rep1","rep2","rep3LF")
+
+# proteinratios <- read.table(fpath,
+#                             header=T,
+#                             stringsAsFactors=F, 
+#                             na.strings="NaN",
+#                             quote = "\"",
+#                             sep="\t", 
+#                             fill = T)
+
+proteinratios_df_list <- read_maxquant_proteingroupfile(proteinGroups.filename = fpath,
+                                    datacolnames = mqdatacolnms,
+                                    uniprot.acc.column = "Majority protein IDs",
+                                    uniprot.id.column = "UniProt names",
+                                    datacolumnprefix = "",
+                                    log2.transform = F,
+                                    is.label.free = T,
+                                    is.gzip.file = T)
+
+
+prot_colnms <- proteinratios_df_list$prot.colnms
+proteinratios <- proteinratios_df_list$prot.table %>% tibble::as_tibble()
+
+```
+
+### Set up the targets_proteins data frame
+This sets up the target matrix that maps sample names with sample SILAC ratios (column names in PhosphoSTY.txt file)
+and which samples were labeled with what SILAC label.
+Make sure the the target data frame has two columns: Light and Heavy
+which indicates the sample's SILAC label.
+targets_proteins. e.g. for a label-swap design.
+    
+
+```{r}
+
+# This sets up the columns for the design matrix "design" uses the limma two color functionality to 
+# model the two SILAC channels heavy and light. The design includes a flipped SILAC analysis
+# for harmine treatment on light cells, with DMSO treated heavy,
+# as well as a null effect, for DMSO treatment of both. We have noticed that in some cell lines
+# there are label specific differences in protein expression that must be controlled for. 
+
+targets_proteins <- data.frame(samples = prot_colnms,
+                      Light = c("DMSO","DMSO","DMSO","SY351"),
+                      Heavy  = c("DMSO","SY351","SY351","DMSO"))
+targets_proteins
+
+```
+
+```{r}
+plotDensities(proteinratios[,prot_colnms])
+
+
+# Copy ratio columns to a new set of columns representing unnormalized ratios (*_nonorm)
+nonorm <- function(x) {x}
+
+proteinratios <- proteinratios %>% mutate_at(vars(targets_proteins$samples), .funs = list(nonorm = ~nonorm(.) )) 
+
+proteinratios[,targets_proteins$samples]  <- limma::normalizeBetweenArrays(proteinratios[,targets_proteins$samples],method = "cyclicloess")
+
+proteinratios[,prot_colnms] <- normalizeBetweenArrays(proteinratios[,prot_colnms],method = "quantile")
+
+proteinratios[,prot_colnms] <- normalizeBetweenArrays(proteinratios[,prot_colnms],method = "cyclicloess")
+
+
+proteinratios$numvalid <- apply(proteinratios[,prot_colnms], 1, function(x) sum(!is.na(x)))
+table(proteinratios$numvalid)
+```
+
+### Set up model matrix
+The first design matrix "design" has just one coefficient (1st and only column) that captures
+the log2(SY351/DMSO) effect. The next design matrix "design.isotopeffect" The first coeficient (first column) 
+is the systematic "isotope effect", which in this context is the systematic difference in the Heavy vs. Light effect
+superimposed on all the other treatments, modeled as an intercept coefficient.
+The second coefficient (column 2) is the log2(SY351/DMSO) effect. This alternative design has improved
+statistical power due to explicit modeling of the isotope labeling effect. We hypothesize that this effect,
+which we have observed in independent experiments with multiple cell lines, is due to protein expression changes
+in the independent cell populations that diverge during the amino acid labeling. 
+
+
+```{r}
+
+
+design <- silac_model_matrix(targets_proteins, ref = "DMSO")
+design <- cbind(rep(1,length(targets_proteins$samples)), design)
+colnames(design) <- c("isotope","SY351")
+design
+
+# In case NA's are not filtered out in source file from Perseus, this condition is used to only 
+# use rows that have at least 2 valid log2 ratios
+selectedrows <- proteinratios$numvalid >= numvalid_thresh
+
+# selectedrows.nullfilt <- proteinratios$numvalid >= numvalid_thresh &  
+#   !is.na(proteinratios$null) & abs(proteinratios$null) < abs_null_log2ratio_thresh
+
+sklm <- lmFit(proteinratios[selectedrows,prot_colnms], design)
+sklm$Amean <- log10(proteinratios$Intensity[selectedrows])
+
+
+meta.names <- c("id",prot_colnms, 'Gene.name',"uniprot.id","uniprot.acc", "Protein.name", "Corum")
+
+#meta.names[!meta.names %in% names(proteinratios)]
+
+#names(proteinratios)[! names(proteinratios) %in% meta.names]
+
+```
+
+
+Make sure you have sourced the "get_toptable.R" script to define this function.
+This model incorporates an isotope effect, with two coefficients,
+Use the second coefficient for the log2(SY351/DMSO) effect.
+If you want to see the isotope label effect, you could call the function with coef = 1 in those cases.
+
+```{r get_tophits_table}
+
+
+proteinratiosfit <- eBayes(sklm, trend = T)
+
+
+proteinstats <- get_toptable(proteinratiosfit,
+                             coef = "SY351", 
+                             glist = proteinratios[selectedrows,meta.names],
+                             suffix = "")
+
+sum(proteinstats$adj.P.Val < fdr.thresh,na.rm=T)
+
+
+isotopeeffectstats <- topTable(proteinratiosfit,coef = "isotope", genelist = proteinratios[selectedrows,meta.names],number = Inf,p.value = 1)
+
+```
+
+### Write out data to files in a subdirectory named for current date
+Change chunk option eval = T if you'd like to write out these files
+ 
+```{r writeoutfiles, echo = T, eval = FALSE}
+write.table(proteinstats,file='DiffsTable_ProteinChanges_Syros_SY351_eBayes_WOld_2020.txt',quote = F,sep = '\t',
+            na = "",row.names = F,col.names = T)
+write.table(names(proteinstats), file='DiffsTable_ProteinChanges_Syros_SY351_colnames_metadata_2020.txt', col.names = F, row.names = F, quote = F)
+
+
+```
+
+### Plot volcano plot for protein SILAC ratios showing changes in abundance with SY-351 treatment (HL-60 cells)
+```{r plotproteinratiovolcano}
+
+
+my.fdr.range.cut <-  c(0,0.01,1)
+proteinstats$fdr.range <- fdrcut(proteinstats$adj.P.Val, my.fdr.range.cut)
+proteinstats$logp <- -log10(proteinstats$P.Value)
+
+logpFDRmin.05 <-   min(proteinstats$logp[proteinstats$adj.P.Val < 0.05 & !is.na(proteinstats$adj.P.Val)], na.rm=T)
+logpFDRmin.1 <-   min(proteinstats$logp[proteinstats$adj.P.Val < 0.1 & !is.na(proteinstats$adj.P.Val)], na.rm=T)
+
+xax <- c(-2.0, -1.0, 0, 
+         1.0, 2.0)
+yax <- c(0:7)
+
+
+
+proteinvolcano <-  xyplot(logp ~ logFC, groups = fdr.range, data = proteinstats,
+                          main = "SY351 treated HL-60 SILAC Protein Changes",
+                          auto.key = list(x = 0.7, y = 0.05, corner = c(0, 0), cex = 1),
+                      xlim = range(xax),ylim = range(yax),
+                      xlab=list(label = "log2(SY351/DMSO)",cex = 1.2),
+                      ylab=list(label = "-log10(p-value)",cex = 1.2),
+                      scales=list(alternating = 1,
+                                       x = list(at = xax, labels = as.character(xax), 
+                                                cex = 1.0, tck = c(-1,0)),
+                                       y = list(at = yax, labels = as.character(yax),
+                                                tick.number = 5, axs="i",  
+                                                cex = 1.0,tck = c(-1,0))
+                                  ),
+                      panel = function(...) {
+                            panel.abline(h=logpFDRmin.1, lty=2, col='gray80')
+                            panel.xyplot(...)
+                            panel.abline(v = 0, lty = 1, lwd=0.5, col = 'gray50')
+                            grid.text("FDR=0.1",
+                                      x=unit(-2, "native"),
+                                      y=unit(logpFDRmin.1+0.05, "native"),
+                                      just=c("left","bottom"),
+                                      gp=gpar(fontsize=7, col="grey50")
+                                      )
+                      })
+
+
+
+s <- trellis.par.get("superpose.symbol")
+s$pch <- c(19,21,21)
+
+s$cex <- 0.8
+s$alpha <- 1
+s$fill <-  c('grey','orange','red')
+s$col <- c('grey', 'black', 'black')
+trellis.par.set("superpose.symbol",s)
+trellis.par.set(add.text=list(cex = 1,col="black"))
+trellis.par.set(par.main.text = list(lineheight = 1, col='black',font=1,cex=1)  )
+
+#+ fig.width=10, fig.height=12
+print(proteinvolcano)
+
+# # Uncomment these lines if you want to interactively label the points in the 
+# # volcano plot. In this case, make sure you uncomment the windows() command above.
+# trellis.focus("panel", 1, 1)
+# ids <- panel.identify(proteinstats$logp ~ proteinstats$logFC  ,labels = proteinstats$Gene.name,cex=1,col='red')
+# trellis.unfocus()
+
+
+proteinstats %>% mutate(Protein.name = str_trunc(Protein.name, width = 25),
+                        Corum = str_trunc(Corum, width = 10)) %>%
+  dplyr::arrange(adj.P.Val) %>% dplyr::top_n(n = 50, wt = dplyr::desc(adj.P.Val)) %>%
+  kable(digits = 2) %>%
+  kable_styling(bootstrap_options = 
+                  c("striped", "hover", "condensed", "responsive"), 
+                font_size = 10) %>% 
+  scroll_box(width = "100%", height = "800px")
+
+
+
+```
+
+

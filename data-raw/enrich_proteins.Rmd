@@ -1,0 +1,20 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(SY351SILAC)
+library(enrichR)
+library(tidyverse)
+
+
+dbs <- enrichR::listEnrichrDbs()
+enriched <- enrichr(genes =  psitestats.protein.totals %>% select(Gene) %>% pull(), dbs$libraryName)
+numsig <- unlist(lapply(enriched, function(x) sum(x$Adjusted.P.value < 0.01))) %>% sort()
+
+endf <- dplyr::bind_rows(enriched)
+
+save( )
+```
